@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.OfferSparesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.OfferSpares">
+        <id column="id" property="id"/>
+        <result column="offer" property="offer"/>
+        <result column="panel" property="panel"/>
+        <result column="spare" property="spare"/>
+        <result column="spare_name" property="spareName"/>
+        <result column="brand" property="brand"/>
+        <result column="count_guid" property="countGuid"/>
+        <result column="count_real" property="countReal"/>
+        <result column="price_cost" property="priceCost"/>
+        <result column="price_sale" property="priceSale"/>
+        <result column="price_guide" property="priceGuide"/>
+        <result column="type" property="type"/>
+    </resultMap>
+    <select id="selectSparesByOffer" resultType="com.jtech.toa.model.dto.products.SpareDetails">
+		SELECT
+	    ps.id, ISNULL(apl.brand_lang,ps.brand) brand, ISNULL(apl.model_lang,ps.model) model, ISNULL(apl.type_lang, ps.type) type,
+	    ps.material, ISNULL(apl.description_lang,ps.description) description,ps.unit,aos.price_guide salePrice, aos.price_sale realPrice,
+	    aos.price_cost costPrice, aos.count_real realCount, aos.count_guid guideCount,aps.counts_two count2Year, aps.cal_type_two type2Year,
+	    aps.spel_two spel2Year, aps.counts_three count3Year, aps.cal_type_three type3Year, aps.spel_three spel3Year, aps.counts_four count4Year,
+	    aps.cal_type_four type4Year, aps.spel_four spel4Year, aps.counts_five count5Year, aps.cal_type_five type5Year, aps.spel_five spel5Year,
+	    aos.id offerSpareId
+        FROM
+	    absen_offer_spares aos
+        INNER JOIN absen_offer_panels aop ON aos.panel = aop.id
+        INNER JOIN absen_product_spare ps ON aos.spare = ps.id
+        LEFT JOIN absen_product_standard aps ON ( aop.panel = aps.product AND aos.spare = aps.spare AND aos.type = aps.type)
+	    LEFT JOIN absen_product_spare_lang apl ON (ps.id = apl.spare AND apl.lang = #{lang})
+        WHERE
+	    aos.offer = #{offerId}
+        AND aos.panel = #{panel}
+        AND aos.type = #{type}
+	</select>
+</mapper>

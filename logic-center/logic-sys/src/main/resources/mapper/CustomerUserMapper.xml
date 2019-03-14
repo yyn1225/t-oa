@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.CustomerUserMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.customer.CustomerUser">
+		<id column="id" property="id" />
+		<result column="customer" property="customer" />
+		<result column="users" property="users" />
+		<result column="assigner" property="assigner" />
+		<result column="assign_time" property="assignTime" />
+	</resultMap>
+
+
+	<select id="getUserId" resultMap="BaseResultMap">
+		SELECT users,id FROM absen_sales_customer_user WHERE customer = #{customer}
+	</select>
+
+	<insert id="saveCustomerUser" parameterType="com.jtech.toa.entity.customer.CustomerUser">
+		INSERT INTO absen_sales_customer_user (customer, users, assigner, assign_time) VALUES (#{customer}, #{users},#{assigner}, #{assignTime});
+	</insert>
+
+	<delete id="deleteByCustomerUser" parameterType="com.jtech.toa.entity.customer.CustomerUser">
+		DELETE FROM absen_sales_customer_user where customer =#{customer}
+	</delete>
+</mapper>

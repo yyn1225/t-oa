@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.BoxMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResults" type="com.jtech.toa.entity.product.Box">
+        <id column="id" property="id"/>
+        <result column="scn_no" property="scnNo"/>
+        <result column="modual" property="modual"/>
+        <result column="height" property="height"/>
+        <result column="width" property="width"/>
+        <result column="transverse_count" property="transverseCount"/>
+        <result column="portrait_count" property="portraitCount"/>
+        <result column="transverse_pix" property="transversePix"/>
+        <result column="portrait_pix" property="portraitPix"/>
+        <result column="thickness" property="thickness"/>
+        <result column="box_type" property="boxType"/>
+        <result column="weight" property="weight"/>
+    </resultMap>
+
+    <resultMap id="BoxDtoMapper" type="com.jtech.toa.model.dto.products.BoxDto">
+        <id column="id" property="id"/>
+        <result column="scn_no" property="scnNo"/>
+        <result column="modual" property="modual"/>
+        <result column="modualNo" property="modualNo"/>
+        <result column="height" property="height"/>
+        <result column="width" property="width"/>
+        <result column="transverse_count" property="transverseCount"/>
+        <result column="portrait_count" property="portraitCount"/>
+        <result column="transverse_pix" property="transversePix"/>
+        <result column="portrait_pix" property="portraitPix"/>
+        <result column="thickness" property="thickness"/>
+        <result column="box_type" property="boxType"/>
+        <result column="weight" property="weight"/>
+    </resultMap>
+
+    <select id="selectBoxListByPage" resultMap="BoxDtoMapper" parameterType="com.jtech.toa.model.dto.products.BoxDto">
+        SELECT
+        b.id,b.scn_no,b.modual,b.height,b.width,b.transverse_count,b.portrait_count,
+        b.transverse_pix,b.portrait_pix,b.thickness,ISNULL(l.type, b.box_type) box_type,b.weight,m.scn_no modualNo,m2.scn_no modualNo2
+        FROM
+        absen_product_box b
+        JOIN absen_product_modual m ON b.modual=m.id
+        LEFT JOIN absen_product_modual m2 ON b.modual2=m2.id
+        LEFT JOIN absen_product_box_lang l
+        ON (b.id = l.box AND l.lang = #{query.lang})
+        WHERE 1=1
+        <if test="query.scnNo !=null and query.scnNo !=''">
+            AND b.scn_no LIKE #{query.customerScnNoLike}
+        </if>
+        <if test="query.modual !=null and query.modual !=''and query.modual !=0">
+            AND (b.modual = #{query.modual} OR  b.modual2=#{query.modual})
+        </if>
+        ORDER BY b.create_time DESC
+    </select>
+
+    <select id="selectBoxList" resultMap="BaseResults">
+        SELECT
+        id,scn_no
+        FROM
+        absen_product_box
+    </select>
+
+    <select id="selectByScnNo" resultMap="BaseResults">
+        SELECT top 1 id,scn_no,modual,height,width,transverse_count,portrait_count,
+        transverse_pix,portrait_pix,thickness,box_type,weight
+        FROM absen_product_box
+        WHERE scn_no= #{scnNo}
+    </select>
+
+    <select id="selectByIdAndLang" resultMap="BaseResults">
+        SELECT
+         b.id,b.scn_no,b.modual,b.modual2,b.height,b.width,b.transverse_count,b.portrait_count,
+        b.transverse_pix,b.portrait_pix,b.thickness,ISNULL(l.type, b.box_type) box_type,b.weight
+        FROM
+        absen_product_box b
+        LEFT JOIN absen_product_box_lang l
+        ON (b.id = l.box AND l.lang = #{lang})
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="findAppBoxs" resultType="com.jtech.toa.model.dto.products.AppBoxs">
+        SELECT TOP 50 b.id,b.scn_no,b.modual,b.modual2,b.transverse_count,b.portrait_count,
+        b.weight,b.transverse_pix,b.portrait_pix,b.height,b.width,b.thickness,
+        b.box_type,l.type AS box_type_lang
+        FROM absen_product_box b
+        LEFT JOIN absen_product_box_lang l ON l.box=b.id AND l.lang='en'
+        WHERE b.id>#{lastId}
+    </select>
+
+    <select id="findAllWithoutBoxLang" resultMap="BaseResults">
+        SELECT * FROM absen_product_box apb
+            WHERE NOT EXISTS (
+              SELECT 1 FROM absen_product_box_lang apbl WHERE apb.id = apbl.box and
+              apbl.lang = 'en' AND apbl.type IS NOT NULL
+         )
+    </select>
+
+    <select id="selectByProductsAndLang" resultMap="BaseResults">
+        SELECT
+        b.id,b.scn_no,b.modual,b.modual2,b.height,b.width,b.transverse_count,b.portrait_count,
+        b.transverse_pix,b.portrait_pix,b.thickness,ISNULL(l.type, b.box_type) box_type,b.weight
+        FROM
+        absen_product_box b
+        LEFT JOIN absen_product_box_lang l
+        ON (b.id = l.box AND l.lang = #{lang})
+        WHERE b.id in (
+        <foreach collection="productList" item="item" separator=",">
+            #{item.box}
+        </foreach>
+        )
+    </select>
+</mapper>

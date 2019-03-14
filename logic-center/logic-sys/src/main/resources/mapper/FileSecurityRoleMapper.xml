@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.FileSecurityRoleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.file.FileSecurityRole">
+		<id column="id" property="id" />
+		<result column="file" property="file" />
+		<result column="role" property="role" />
+		<result column="security" property="security" />
+	</resultMap>
+	<select id="securityRoleList" resultMap="BaseResultMap">
+		SELECT id AS id,[file],role,security
+		FROM absen_file_security_role
+		WHERE  [file] = #{fileId}
+	</select>
+
+	<delete id="deleteByFile">
+		DELETE FROM absen_file_security_role
+		WHERE [file] = #{fileId}
+	</delete>
+	<insert id="insertSecurity">
+		INSERT INTO absen_file_security_role ([file],role,security)
+		VALUES (#{file},#{role},#{security})
+	</insert>
+
+	<select id="selectByRoleAndFile" resultMap="BaseResultMap">
+		SELECT security
+		FROM absen_file_security_role
+		WHERE [file] = #{fileId}
+		AND role = #{roleId}
+	</select>
+
+	<select id="selectByRoleAndSecurity" resultMap="BaseResultMap">
+		SELECT  id,[file],role,security
+		FROM absen_file_security_role
+		WHERE [file] = #{file} AND security = #{security}
+	</select>
+
+	<select id="checkFileSecurity" resultType="Integer">
+		SELECT TOP 1 r.security
+		FROM absen_file_security_role r
+		JOIN absen_org_role_user u ON u.role=r.role AND u.users=#{user}
+		WHERE r.[file]=#{file}
+		ORDER BY r.security DESC
+	</select>
+
+	<delete id="deleteByFileIds">
+		DELETE FROM absen_file_security_role
+		WHERE [file] IN
+		<foreach item="idItem" collection="fileIds" open="("  separator=","  close=")">
+			#{idItem}
+		</foreach>
+	</delete>
+</mapper>

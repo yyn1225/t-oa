@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SalesAddressMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.customer.SalesAddress">
+		<id column="id" property="id" />
+		<result column="level1" property="level1" />
+		<result column="level2" property="level2" />
+		<result column="level3" property="level3" />
+		<result column="level4" property="level4" />
+		<result column="level5" property="level5" />
+		<result column="details" property="details" />
+	</resultMap>
+
+</mapper>

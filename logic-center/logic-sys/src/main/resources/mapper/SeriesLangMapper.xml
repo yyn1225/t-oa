@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SeriesLangMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.product.SeriesLang">
+		<id column="id" property="id" />
+		<result column="lang" property="lang" />
+		<result column="series" property="series" />
+		<result column="name_lang" property="nameLang" />
+		<result column="remark_lang" property="remarkLang" />
+	</resultMap>
+	<select id="selectByType" resultMap="BaseResultMap">
+		SELECT apsl.id,lang,series,name_lang,remark_lang FROM absen_product_series_lang apsl
+        INNER JOIN absen_product_series aps ON aps.id = apsl.series
+	</select>
+</mapper>

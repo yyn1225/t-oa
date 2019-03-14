@@ -1,0 +1,80 @@
+
+**** Error file opened at 20180329 111418 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:14:18,982<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 112122 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:21:22,401<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 112420 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:24:20,764<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 113005 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:30:05,161<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 113500 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:35:00,741<    >RfcGetException rc (7) message: ## 500 ########
+<RfcGetException
+
+
+**** Error file opened at 20180329 113907 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:39:07,117<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 114508 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:45:08,138<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 114801 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 11:48:01,803<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 122710 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 12:27:10,003<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 160907 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 16:09:07,834<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180329 161205 China Standard Time Rel 3.0.5 (2010-03-03) [720.63]
+Error:  >Thu Mar 29 16:12:05,412<    >RfcGetException rc (7) message: 指定有效日期
+<RfcGetException
+
+
+**** Error file opened at 20180503 121521 China Standard Time Rel 3.0.10 (2013-08-08) [721.619]
+Error:  >Thu May 03 12:15:21,245<    RfcException: [null]
+    message: Connect to SAP gateway failed
+Connection parameters: TYPE=A DEST=Sap ASHOST=192.168.100.72 SYSNR=00 PCS=1
+
+LOCATION    CPIC (TCP/IP) on local host with Unicode
+ERROR       partner '192.168.100.72:3300' not reached
+TIME        Thu May 03 12:15:21 2018
+RELEASE     721
+COMPONENT   NI (network interface)
+VERSION     40
+RC          -10
+MODULE      nixxi.cpp
+LINE        3283
+DETAIL      NiPConnect2: 192.168.100.72:3300
+SYSTEM CALL connect
+ERRNO       10060
+ERRNO TEXT  WSAETIMEDOUT: Connection timed out
+COUNTER     3
+
+    Return code: RFC_FAILURE(1)
+    error group: 102
+    key: RFC_ERROR_COMMUNICATION
+

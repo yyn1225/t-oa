@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.prices.PriceSystemMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.prices.PriceSystem">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="creater" property="creater" />
+		<result column="create_time" property="createTime" />
+		<result column="area" property="area" />
+		<result column="start_time" property="startTime" />
+		<result column="end_time" property="endTime" />
+		<result column="unit" property="unit" />
+	</resultMap>
+
+	<select id="findListByPage" resultType="com.jtech.toa.model.dto.prices.PriceSystemDto">
+		SELECT s.*,d.name AS area_name,u.name AS create_name FROM absen_price_system s
+		LEFT JOIN absen_org_user u ON s.creater=u.id
+		LEFT JOIN absen_org_department d ON d.id=s.area
+		WHERE 1=1
+		<if test="area!=0">AND s.area=#{area}</if>
+	</select>
+
+	<select id="getSystemByArea" resultMap="BaseResultMap">
+		SELECT s.* FROM absen_price_system s
+		JOIN absen_price_assign a ON a.area=#{area} AND a.systems=s.id
+		WHERE #{date}>s.start_time AND s.end_time>#{date}
+	</select>
+
+	<select id="findListByUserPage" resultType="com.jtech.toa.model.dto.prices.PriceSystemDto">
+		SELECT s.*,d.name AS area_name,u.name AS create_name FROM absen_price_system s
+		LEFT JOIN absen_org_user u ON s.creater=u.id
+		LEFT JOIN absen_org_department d ON d.id=s.area
+		JOIN absen_price_security c ON  c.accepter=#{user} AND s.id=c.systems
+	</select>
+</mapper>

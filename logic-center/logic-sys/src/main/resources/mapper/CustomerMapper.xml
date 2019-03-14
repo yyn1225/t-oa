@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.CustomerMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.customer.Customer">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="website" property="website" />
+		<result column="ticker_symbol" property="tickerSymbol" />
+		<result column="parent" property="parent" />
+		<result column="employees" property="employees" />
+		<result column="ownership" property="ownership" />
+		<result column="type" property="type" />
+		<result column="account_type" property="accountType" />
+		<result column="account_number" property="accountNumber" />
+		<result column="location" property="location" />
+		<result column="phone" property="phone" />
+		<result column="fax" property="fax" />
+		<result column="email" property="email" />
+		<result column="rating" property="rating" />
+		<result column="revenue" property="revenue" />
+		<result column="sic_code" property="sicCode" />
+		<result column="billing" property="billing" />
+		<result column="shipping" property="shipping" />
+		<result column="description" property="description" />
+		<result column="status" property="status" />
+	</resultMap>
+
+	<resultMap id="CustomerDtoMap" type="com.jtech.toa.model.dto.sys.CustomerDto">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="ticker_symbol" property="tickerSymbol" />
+		<result column="employees" property="employees" />
+		<result column="ownership" property="ownership" />
+		<result column="type" property="type" />
+		<result column="account_type" property="accountType" />
+		<result column="account_number" property="accountNumber" />
+		<result column="location" property="location" />
+		<result column="phone" property="phone" />
+		<result column="rating" property="rating" />
+		<result column="levelName" property="levelName" />
+		<result column="email" property="email" />
+		<result column="website" property="website" />
+	</resultMap>
+
+	<select id="selectCustomerListByPage" resultMap="CustomerDtoMap"
+					 parameterType="com.jtech.toa.model.dto.sys.CustomerDto">
+	SELECT
+	cu.id,cu.name,cu.ticker_symbol,cu.employees,cu.ownership,
+	cu.type,cu.account_type,cu.account_number,cu.location,cu.phone,cu.rating,l.name levelName, cu.delete_able deleteAble
+	FROM
+	absen_sales_customer cu
+	LEFT JOIN absen_sales_levels l
+	ON cu.rating=l.id
+	WHERE 1=1
+	<if test="query!=null">
+		<if test="query.name !=null and query.name !=''">
+			AND cu.name LIKE #{query.customerNameLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<!--<if test="query.area !=null and query.area !=0">-->
+			<!--AND l.org = #{query.area}-->
+		<!--</if>-->
+		<if test="query.startTime !=null and query.startTime !=''">
+			<if test="query.endTime !=null and query.endTime !=''">
+				AND l.org = #{query.area}
+			</if>
+		</if>
+	</if>
+	and cu.status=1
+</select>
+
+
+	<select id="selectCustomerLevel" resultMap="CustomerDtoMap"
+			parameterType="com.jtech.toa.model.dto.sys.CustomerDto">
+			SELECT
+	  levels.id,ISNULL(lang.name_lang, levels.name) as name
+		FROM absen_sales_levels levels
+		LEFT JOIN absen_sales_levels_lang lang
+		on levels.id = lang.level
+		where lang.lang =#{lang}
+	</select>
+
+	<update id="deleteByCustomer">
+		UPDATE  absen_sales_customer SET status = 0 where id = #{customer}
+	</update>
+
+	<select id="selectCustomerListByPageForProtal" resultMap="CustomerDtoMap">
+		SELECT
+	cu.id,cu.name,cu.ticker_symbol,cu.employees,cu.ownership,cu.website,
+	cu.type,cu.account_type,cu.account_number,cu.location,cu.phone,cu.rating,l.name levelName,cu.email
+	FROM
+	absen_sales_customer cu
+	LEFT JOIN absen_sales_levels l ON cu.rating=l.id
+	INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+
+	WHERE cu.status=1 AND ascu.users = #{query.userId}
+		<if test="query.name !=null and query.name !=''">
+			AND cu.name LIKE #{query.customerNameLike}
+		</if>
+		<if test="query.type !=null and query.type !=''">
+			AND cu.type LIKE #{query.typeLike}
+		</if>
+		<if test="query.location !=null and query.location !=''">
+			AND cu.location LIKE #{query.locationLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<if test="query.startTime !=null">
+			<if test="query.endTime !=null">
+				<![CDATA[
+				AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+				]]>
+			</if>
+		</if>
+	</select>
+	<select id="selectCustomerListAllByPage" resultMap="CustomerDtoMap">
+	SELECT
+	cu.id,
+	cu.name,
+	cu.ticker_symbol,
+	cu.employees,
+	cu.ownership,
+	cu.website,
+	cu.type,
+	cu.account_type,
+	cu.account_number,
+	cu.location,
+	cu.phone,
+	cu.rating,
+	l.name levelName,
+	cu.email
+	FROM
+	absen_sales_customer cu
+	LEFT JOIN absen_sales_levels l ON cu.rating = l.id
+	INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+	WHERE cu.status=1
+	<if test="query.name !=null and query.name !=''">
+		AND cu.name LIKE #{query.customerNameLike}
+	</if>
+	<if test="query.type !=null and query.type !=''">
+		AND cu.type LIKE #{query.typeLike}
+	</if>
+	<if test="query.location !=null and query.location !=''">
+		AND cu.location LIKE #{query.locationLike}
+	</if>
+	<if test="query.rating !=null and query.rating !=0">
+		AND cu.rating = #{query.rating}
+	</if>
+	<if test="query.startTime !=null">
+		<if test="query.endTime !=null">
+			<![CDATA[
+					AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+					]]>
+		</if>
+	</if>
+</select>
+
+	<select id="selectCustomerListRegionByPage" resultMap="CustomerDtoMap">
+		SELECT
+		cu.id,cu.name,cu.ticker_symbol,cu.employees,cu.ownership,cu.website,
+		cu.type,cu.account_type,cu.account_number,cu.location,cu.phone,cu.rating,l.name levelName,cu.email
+		FROM
+		absen_sales_customer cu
+		LEFT JOIN absen_sales_levels l ON cu.rating=l.id
+		INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+		WHERE
+		cu.status = 1
+		AND ascu.users IN (
+		SELECT
+		u.id
+		FROM
+		absen_org_user u
+		WHERE
+		u.area = #{area}
+		)
+		<if test="query.name !=null and query.name !=''">
+			AND cu.name LIKE #{query.customerNameLike}
+		</if>
+		<if test="query.type !=null and query.type !=''">
+			AND cu.type LIKE #{query.typeLike}
+		</if>
+		<if test="query.location !=null and query.location !=''">
+			AND cu.location LIKE #{query.locationLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<if test="query.startTime !=null">
+			<if test="query.endTime !=null">
+				<![CDATA[
+				AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+				]]>
+			</if>
+		</if>
+	</select>
+
+	<select id="selectCustomerListResponsibleByPage" resultMap="CustomerDtoMap">
+		SELECT
+		cu.id,
+		cu.name,
+		cu.ticker_symbol,
+		cu.employees,
+		cu.ownership,
+		cu.website,
+		cu.type,
+		cu.account_type,
+		cu.account_number,
+		cu.location,
+		cu.phone,
+		cu.rating,
+		l.name levelName,
+		cu.email
+		FROM
+		absen_sales_customer cu
+		LEFT JOIN absen_sales_levels l ON cu.rating = l.id
+		INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+		WHERE
+		cu.status = 1
+		AND ascu.users IN (
+		SELECT u.id FROM absen_org_user u
+		WHERE u.id IN (SELECT users FROM absen_org_department_user du WHERE du.department
+		IN (SELECT id FROM absen_org_department WHERE leader = #{query.userId} AND [level] = #{query.userId})
+		)
+		UNION SELECT id FROM absen_org_user WHERE id = #{query.userId}
+		)
+		<if test="query.name !=null and query.name !=''">
+			AND cu.name LIKE #{query.customerNameLike}
+		</if>
+		<if test="query.type !=null and query.type !=''">
+			AND cu.type LIKE #{query.typeLike}
+		</if>
+		<if test="query.location !=null and query.location !=''">
+			AND cu.location LIKE #{query.locationLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<if test="query.startTime !=null">
+			<if test="query.endTime !=null">
+				<![CDATA[
+				AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+				]]>
+			</if>
+		</if>
+	</select>
+
+	<select id="selectCustomerListAllByLastId" resultMap="CustomerDtoMap">
+		SELECT
+		TOP 20
+		cu.id,
+		cu.name,
+		cu.ticker_symbol,
+		cu.employees,
+		cu.ownership,
+		cu.website,
+		cu.type,
+		cu.account_type,
+		cu.account_number,
+		cu.location,
+		cu.phone,
+		cu.rating,
+		l.name levelName,
+		cu.email
+		FROM
+		absen_sales_customer cu
+		LEFT JOIN absen_sales_levels l ON cu.rating = l.id
+		INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+		WHERE cu.status=1
+		<if test="query.name !=null and query.name !=''">
+			AND (cu.name LIKE #{query.customerNameLike} OR cu.type LIKE #{query.customerNameLike})
+		</if>
+		<if test="query.type !=null and query.type !=''">
+			AND cu.type LIKE #{query.typeLike}
+		</if>
+		<if test="query.location !=null and query.location !=''">
+			AND cu.location LIKE #{query.locationLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<if test="query.startTime !=null">
+			<if test="query.endTime !=null">
+				<![CDATA[
+					AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+					]]>
+			</if>
+		</if>
+		AND cu.id > #{lastId}
+		ORDER BY cu.id ASC
+	</select>
+
+	<select id="selectCustomerListRegionByLastId" resultMap="CustomerDtoMap">
+		SELECT
+		TOP 20 cu.id,cu.name,cu.ticker_symbol,cu.employees,cu.ownership,cu.website,
+		cu.type,cu.account_type,cu.account_number,cu.location,cu.phone,cu.rating,l.name levelName,cu.email
+		FROM
+		absen_sales_customer cu
+		LEFT JOIN absen_sales_levels l ON cu.rating=l.id
+		INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+		WHERE
+		cu.status = 1
+		AND ascu.users IN (
+		SELECT
+		u.id
+		FROM
+		absen_org_user u
+		WHERE
+		u.area = #{area}
+		)
+		<if test="query.name !=null and query.name !=''">
+			AND (cu.name LIKE #{query.customerNameLike} OR cu.type LIKE #{query.customerNameLike})
+		</if>
+		<if test="query.type !=null and query.type !=''">
+			AND cu.type LIKE #{query.typeLike}
+		</if>
+		<if test="query.location !=null and query.location !=''">
+			AND cu.location LIKE #{query.locationLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<if test="query.startTime !=null">
+			<if test="query.endTime !=null">
+				<![CDATA[
+				AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+				]]>
+			</if>
+		</if>
+		AND cu.id > #{lastId}
+		ORDER BY cu.id ASC
+	</select>
+
+	<select id="selectCustomerListResponsibleByLastId" resultMap="CustomerDtoMap">
+		SELECT
+		TOP 20
+		cu.id,
+		cu.name,
+		cu.ticker_symbol,
+		cu.employees,
+		cu.ownership,
+		cu.website,
+		cu.type,
+		cu.account_type,
+		cu.account_number,
+		cu.location,
+		cu.phone,
+		cu.rating,
+		l.name levelName,
+		cu.email
+		FROM
+		absen_sales_customer cu
+		LEFT JOIN absen_sales_levels l ON cu.rating = l.id
+		INNER JOIN absen_sales_customer_user ascu ON ascu.customer = cu.id
+		WHERE
+		cu.status = 1
+		AND ascu.users IN (
+		SELECT u.id FROM absen_org_user u
+		WHERE u.id IN (SELECT users FROM absen_org_department_user du WHERE du.department
+		IN (SELECT id FROM absen_org_department WHERE leader = #{query.userId} AND [level] = #{query.userId})
+		)
+		UNION SELECT id FROM absen_org_user WHERE id = #{query.userId}
+		)
+		<if test="query.name !=null and query.name !=''">
+			AND (cu.name LIKE #{query.customerNameLike} OR cu.type LIKE #{query.customerNameLike})
+		</if>
+		<if test="query.type !=null and query.type !=''">
+			AND cu.type LIKE #{query.typeLike}
+		</if>
+		<if test="query.location !=null and query.location !=''">
+			AND cu.location LIKE #{query.locationLike}
+		</if>
+		<if test="query.rating !=null and query.rating !=0">
+			AND cu.rating = #{query.rating}
+		</if>
+		<if test="query.startTime !=null">
+			<if test="query.endTime !=null">
+				<![CDATA[
+				AND (ascu.assign_time > #{query.startTime} AND ascu.assign_time < #{query.endTime})
+				]]>
+			</if>
+		</if>
+		AND cu.id > #{lastId}
+		ORDER BY cu.id ASC
+	</select>
+
+	<select id="findMyCustomer" resultMap="BaseResultMap">
+		SELECT c.* FROM absen_sales_customer c
+		JOIN absen_sales_customer_user u ON u.customer=c.id AND u.users=#{user}
+	</select>
+
+	<select id="findMyCustomerPage" resultMap="BaseResultMap">
+		SELECT TOP 500 c.* FROM absen_sales_customer c
+		JOIN absen_sales_customer_user u ON u.customer=c.id AND u.users=#{user}
+		AND c.id>#{lastId}
+		ORDER BY c.id ASC
+	</select>
+
+	<select id="findMyCustomerOfassistantPage" resultMap="BaseResultMap">
+		SELECT TOP 500 c.* FROM absen_sales_customer c
+		JOIN absen_sales_customer_user u ON u.customer=c.id
+		<if test="ids!=null and ids.size > 0">
+			AND u.users IN
+			<foreach item="idItem" collection="ids" open="("  separator=","  close=")">
+				#{idItem}
+			</foreach>
+		</if>
+		AND c.id > #{lastId}
+		ORDER BY c.id ASC
+	</select>
+
+	<select id="findMyAndAutosuggestCustomer" resultMap="BaseResultMap">
+		SELECT c.* FROM absen_sales_customer c
+		JOIN absen_sales_customer_user u ON u.customer=c.id AND u.users=#{user}
+		WHERE 1=1
+		<if test="query.name !=null and query.name !=''">
+			AND c.name LIKE #{query.customerNameLike}
+		</if>
+		ORDER BY c.id DESC
+	</select>
+
+	<select id="findUnSingedList" resultMap="BaseResultMap">
+		SELECT id,crm_id FROM absen_sales_customer c
+		WHERE NOT EXISTS (SELECT * FROM absen_sales_customer_user u WHERE c.id=u.customer)
+		AND c.crm_id IS NOT NULL
+	</select>
+
+	<select id="selectByTime" resultMap="BaseResultMap">
+		SELECT TOP 4 [name] FROM absen_sales_customer sc
+		INNER JOIN absen_sales_customer_user scu
+		ON sc.id = scu.customer
+		WHERE scu.assign_time BETWEEN #{startTime} AND #{endTime} AND scu.users=#{userId}
+	</select>
+</mapper>

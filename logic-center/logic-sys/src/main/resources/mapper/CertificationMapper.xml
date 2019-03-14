@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.CertificationMapper">
+    <select id="selectCertificationList" resultType="com.jtech.toa.entity.basic.Certification"
+            parameterType="com.jtech.toa.entity.basic.Certification">
+        SELECT
+        id,[name],code,status
+        FROM
+        absen_product_certification
+    </select>
+
+    <select id="selectCertificationListBySeries" resultType="com.jtech.toa.entity.basic.Certification">
+        SELECT * FROM absen_product_certification c
+        WHERE EXISTS (SELECT 1 FROM absen_product p WHERE charindex(c.code,p.certification)>0 AND p.series=#{series})
+    </select>
+
+    <select id="selectByCode" resultType="com.jtech.toa.entity.basic.Certification">
+        SELECT * FROM absen_product_certification WHERE code=#{code}
+    </select>
+</mapper>

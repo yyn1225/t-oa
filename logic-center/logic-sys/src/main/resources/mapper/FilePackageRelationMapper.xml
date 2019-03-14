@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property o JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.FilePackageRelationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.file.FilePackageRelation">
+        <result column="packages" property="packages"/>
+        <result column="files" property="files"/>
+    </resultMap>
+    <delete id="deleteByFile">
+		DELETE FROM absen_file_package_relation WHERE files = #{fileId}
+	</delete>
+    <select id="selectPackageIdsByFileId" resultType="Integer">
+		SELECT packages FROM absen_file_package_relation WHERE files = #{fileId}
+	</select>
+    <delete id="deleteByFileAndPackage">
+		DELETE FROM absen_file_package_relation WHERE files = #{fileId} AND packages = #{packageId}
+	</delete>
+</mapper>

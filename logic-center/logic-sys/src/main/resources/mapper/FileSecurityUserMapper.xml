@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.FileSecurityUserMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.file.FileSecurityUser">
+		<id column="id" property="id" />
+		<result column="user" property="user" />
+		<result column="file" property="file" />
+		<result column="security" property="security" />
+	</resultMap>
+	<select id="selectSecurityUser" resultMap="BaseResultMap">
+		SELECT id AS id,[file],[user],security
+		FROM absen_file_security_user
+		WHERE  [file] = #{fileId}
+	</select>
+
+	<delete id="deleteByFile">
+		DELETE FROM absen_file_security_user
+		WHERE [file] = #{fileId}
+	</delete>
+
+	<insert id="insertSecurity">
+		INSERT INTO absen_file_security_user ([file],[user],security)
+		VALUES (#{file},#{user},#{security})
+	</insert>
+
+	<select id="selectByUserAndFile" resultMap="BaseResultMap">
+		SELECT security
+		FROM absen_file_security_user
+		WHERE [file] = #{fileId}
+		AND [user] = #{userId}
+	</select>
+</mapper>

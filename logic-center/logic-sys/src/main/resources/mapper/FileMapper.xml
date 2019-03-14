@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.FileMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.file.File">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="extend" property="extend"/>
+        <result column="type" property="type"/>
+        <result column="url" property="url"/>
+        <result column="size" property="size"/>
+        <result column="path" property="path"/>
+        <result column="upload_time" property="uploadTime"/>
+        <result column="uploader" property="uploader"/>
+        <result column="package" property="packages"/>
+    </resultMap>
+    <update id="updateNewPackageIdByOldPackageId">
+		UPDATE absen_file SET package = #{newPackage} WHERE package = #{oldPackage}
+	</update>
+
+    <select id="searchByPagination" resultType="com.jtech.toa.model.dto.files.FileDto">
+        SELECT
+        af.id,
+        af.name,
+        af.extend,
+        af.type,
+        af.url,
+        af.[size],
+        af.path,
+        af.upload_time uploadTime,
+        af.securitys
+        FROM
+        absen_file AS af
+        <if test="query!=null">
+            <if test="query.folderId!=null and query.folderId !=0">
+                LEFT JOIN absen_file_package_relation afpr ON af.id = afpr.files
+                LEFT JOIN absen_file_package afp ON afpr.packages =afp.id
+            </if>
+            <if test="query.seriesId!=null and query.seriesId!=0">
+                LEFT JOIN absen_file_series afs ON afs.files = af.id
+            </if>
+        </if>
+        WHERE 1=1
+        <if test="query!=null">
+            <if test="query.folderId!=0 and query.folderId!=null">
+                AND afp.id = #{query.folderId}
+            </if>
+            <if test="query.name!=null and query.name!=''">
+                AND af.name LIKE #{query.nameLike}
+            </if>
+            <if test="query.seriesId!=null and query.seriesId!=0">
+                AND afs.series = #{query.seriesId}
+            </if>
+            <if test="query.category!=null and query.category!=0">
+                AND af.category = #{query.category}
+            </if>
+            <if test="query.extend!=null and query.extend.size >0">
+                AND af.extend in  <foreach item="ex" index="index" collection="query.extend"
+                                           open="(" separator="," close=")"> #{ex}</foreach>
+            </if>
+        </if>
+        ORDER BY af.upload_time DESC
+    </select>
+
+    <select id="selectBySeriesAndPage" resultType="com.jtech.toa.model.dto.files.FileDto">
+        SELECT
+        af.id,
+        af.name,
+        af.extend,
+        af.url,
+        af.[size],
+        af.path,
+        af.type,
+        af.securitys,
+        p.name seriesName
+        FROM absen_file af
+        JOIN absen_file_series s ON af.id = s.files
+        JOIN absen_product_series p ON p.id = s.series
+
+        <if test="query != null">
+            <if test="query.seriesId != null">
+                AND s.series = #{query.seriesId}
+            </if>
+            <if test="query.name!=null and query.name!=''">
+                AND af.name LIKE #{query.nameLike}
+            </if>
+        </if>
+    </select>
+
+    <select id="findFileListByUser" resultMap="BaseResultMap">
+        SELECT * FROM absen_file t WHERE t.securitys=2 OR t.securitys=1
+        UNION
+        SELECT * FROM absen_file t WHERE t.securitys=3 AND EXISTS (
+        SELECT 1 FROM absen_file_security_role r
+        JOIN absen_org_role_user u ON u.users=#{user} AND r.role=u.role
+        WHERE r.[file]=t.id)
+    </select>
+
+    <select id="findTenFileListByUser" resultMap="BaseResultMap">
+        SELECT TOP 10 f.* FROM (SELECT * FROM absen_file t WHERE t.securitys=2 OR t.securitys=1
+        UNION
+        SELECT * FROM absen_file t WHERE t.securitys=3 AND EXISTS (
+        SELECT 1 FROM absen_file_security_role r
+        JOIN absen_org_role_user u ON u.users=#{user} AND r.role=u.role
+        WHERE r.[file]=t.id)) f WHERE category=#{type} ORDER BY upload_time
+    </select>
+
+    <select id="findPageFileListByUser" resultMap="BaseResultMap">
+        SELECT TOP 20 f.* FROM (
+        SELECT * FROM absen_file t WHERE t.securitys=2 OR t.securitys=1
+        UNION
+        SELECT * FROM absen_file t WHERE t.securitys=3 AND EXISTS (
+        SELECT 1 FROM absen_file_security_role r
+        JOIN absen_org_role_user u ON u.users=#{userId} AND r.role=u.role
+        WHERE r.[file]=t.id)) f
+        WHERE f.id>#{lastId}
+        ORDER BY f.id ASC
+    </select>
+
+
+    <select id="findTenFileListByUserAndPage" resultMap="BaseResultMap">
+        SELECT TOP 20 t.*,ISNULL(amdl.name_lang, amd.name) AS detailName FROM (
+        SELECT * FROM absen_file f WHERE f.securitys=2 OR f.securitys=1
+        UNION
+        SELECT * FROM absen_file f WHERE f.securitys=3 AND EXISTS (
+        SELECT 1 FROM absen_file_security_role r
+        JOIN absen_org_role_user u ON u.users=#{query.userId} AND r.role=u.role
+        WHERE r.[file]=f.id)) t
+        LEFT JOIN absen_file_market_detail amd
+        ON t.market = amd.id
+        LEFT JOIN absen_file_market_detail_lang amdl
+        ON (amd.id = amdl.detail AND amdl.lang = #{query.lang})
+        <if test="query!=null">
+            <if test="query.folderId!=null and query.folderId.size > 0">
+                JOIN absen_file_package_relation afpr ON t.id = afpr.files AND afpr.packages IN
+                <foreach item="idItem" collection="query.folderId" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            <if test="query.seriesId!=null and query.seriesId.size > 0">
+                JOIN absen_file_series afs ON afs.files = t.id AND afs.series IN
+                <foreach item="idItem" collection="query.seriesId" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            WHERE 1=1
+            <if test="query.name!=null and query.name!=''">
+                AND t.name LIKE #{query.nameLike}
+            </if>
+            <if test="query.category!=null and query.category!=0">
+                AND t.category = #{query.category}
+            </if>
+            <if test="query.fileMarketDetailId!=null and query.fileMarketDetailId.size > 0">
+                AND t.market IN
+                <foreach item="idItem" collection="query.fileMarketDetailId" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+        </if>
+        <if test="last!=0">
+            AND #{last} &lt; t.id
+        </if>
+        ORDER BY t.id
+    </select>
+    <select id="findTenFileListByIds" resultMap="BaseResultMap">
+        SELECT t.*,ISNULL(amdl.name_lang, amd.name) AS detailName FROM (
+        SELECT * FROM absen_file f WHERE f.securitys=2 OR f.securitys=1
+        UNION
+        SELECT * FROM absen_file f WHERE f.securitys=3 AND EXISTS (
+        SELECT 1 FROM absen_file_security_role r
+        JOIN absen_org_role_user u ON u.users=#{userId} AND r.role=u.role
+        WHERE r.[file]=f.id)) t
+        LEFT JOIN absen_file_market_detail amd
+        ON t.market = amd.id
+        LEFT JOIN absen_file_market_detail_lang amdl
+        ON (amd.id = amdl.detail AND amdl.lang = #{lang})
+        <if test="ids.size > 0">
+            AND t.id IN
+            <foreach item="idItem" collection="ids" open="("  separator=","  close=")">
+                #{idItem}
+            </foreach>
+        </if>
+        ORDER BY t.id
+    </select>
+
+    <select id="selectBySecurity" resultType="com.jtech.toa.model.dto.files.FileDto">
+        SELECT t.*,ISNULL(amdl.name_lang, amd.name) AS detailName FROM (
+            SELECT * FROM absen_file f WHERE f.securitys=2 OR f.securitys=1
+            UNION
+            SELECT * FROM absen_file f WHERE f.securitys=3 AND EXISTS (
+            SELECT 1 FROM absen_file_security_role r
+            JOIN absen_org_role_user u ON u.users=#{query.userId} AND r.role=u.role
+            WHERE r.[file]=f.id)) t
+            LEFT JOIN absen_file_market_detail amd
+            ON t.market = amd.id
+            LEFT JOIN absen_file_market_detail_lang amdl
+            ON (amd.id = amdl.detail AND amdl.lang = #{query.lang})
+        <if test="query!=null">
+            <if test="query.folderId!=null and query.folderId.size > 0">
+                JOIN absen_file_package_relation afpr ON t.id = afpr.files AND afpr.packages IN
+                <foreach item="idItem" collection="query.folderId" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            <if test="query.seriesId!=null and query.seriesId.size > 0">
+                JOIN absen_file_series afs ON afs.files = t.id AND afs.series IN
+                <foreach item="idItem" collection="query.seriesId" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            WHERE 1=1
+            <if test="query.name!=null and query.name!=''">
+                AND t.name LIKE #{query.nameLike}
+            </if>
+            <if test="query.category!=null and query.category!=0">
+                AND t.category = #{query.category}
+            </if>
+            <if test="query.fileMarketDetailId!=null and query.fileMarketDetailId.size > 0">
+                AND t.market IN
+                <foreach item="idItem" collection="query.fileMarketDetailId" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            <if test="query.extend!=null and query.extend.size >0">
+                AND t.extend in  <foreach item="ex" index="index" collection="query.extend"
+                                           open="(" separator="," close=")"> #{ex}</foreach>
+            </if>
+        </if>
+        ORDER BY t.id
+    </select>
+
+    <select id="getAllFileByUserForApp" resultMap="BaseResultMap">
+        select t.* from (select * from absen_file f
+        where f.securitys=2 OR f.securitys=1
+        UNION
+        SELECT * FROM absen_file f WHERE f.securitys=3 and f.id in (
+          select r.[file] from absen_file_security_role r INNER JOIN
+          absen_org_role_user u on r.role = u.role
+          where u.users = #{userId}
+        )) t order by t.id
+    </select>
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ConfigurationMapper">
+    <select id="selectConfigurationList" resultType="com.jtech.toa.entity.basic.Configuration"
+            parameterType="com.jtech.toa.entity.basic.Configuration">
+       SELECT
+        con.id,isNull(lang.remark_lang,con.remark ) as remark
+        FROM
+        absen_product_configuration con
+		LEFT JOIN absen_product_configuration_lang lang on con.id = lang.configuration
+		where lang.lang = #{lang}
+    </select>
+
+    <select id="selectBySeries" resultType="com.jtech.toa.entity.basic.Configuration">
+        SELECT apc.id, ISNULL(apcl.remark_lang, apc.remark) remark FROM absen_product_configuration apc
+        LEFT JOIN absen_product_configuration_lang apcl ON (apc.id = apcl.configuration AND apcl.lang = #{lang})
+        WHERE apc.id IN (
+          SELECT DISTINCT(configuration)
+          FROM absen_product WHERE series=#{series}
+        )
+    </select>
+
+    <select id="findAppList" resultType="com.jtech.toa.model.dto.products.AppConfiguration">
+        SELECT c.id,c.remark,l.remark_lang FROM absen_product_configuration c
+        LEFT JOIN absen_product_configuration_lang l ON c.id=l.configuration AND l.lang='en'
+    </select>
+
+    <select id="selectByIdAndLang" resultType="com.jtech.toa.entity.basic.Configuration">
+        SELECT ISNULL(cl.remark_lang, remark) remark FROM absen_product_configuration c INNER JOIN absen_product_configuration_lang cl
+        ON (c.id = cl.configuration AND cl.lang = #{lang}) WHERE c.id = #{id}
+    </select>
+</mapper>

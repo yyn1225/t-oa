@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.OfferServiceMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.OfferService">
+		<id column="id" property="id" />
+		<result column="offer" property="offer" />
+		<result column="name" property="name" />
+		<result column="counts" property="counts" />
+		<result column="price" property="price" />
+		<result column="unit" property="unit" />
+	</resultMap>
+
+	<select id="selectListById" resultType="com.jtech.toa.model.dto.offer.OfferServiceDto">
+		 select
+		ser.id AS  id,
+		ser.offer as offer,
+		ISNULL((
+		SELECT
+		ISNULL( abdl.name_lang, abd.name ) name
+		FROM
+		absen_basic_dict abd
+		LEFT JOIN absen_basic_dict_lang abdl ON abd.id = abdl.dict
+		AND abdl.lang = #{lang}
+		WHERE
+		abd.category = 'offer_service'
+		AND abd.code = ser.name
+		),
+		ser.name
+		) AS name,
+		ser.counts as counts,
+		ser.price AS price,
+		ser.unit as unit
+		  from absen_offer_service ser
+		  WHERE  1=1
+		<if test="id != null">
+			and ser.offer = #{id}
+		</if>
+
+	</select>
+
+</mapper>

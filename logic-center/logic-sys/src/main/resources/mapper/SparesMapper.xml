@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SpareMapper">
+    <resultMap id="baseMapper" type="com.jtech.toa.entity.product.Spare">
+        <id column="id" property="id"/>
+        <result column="brand" property="brand"/>
+        <result column="model" property="model"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="excute_time" property="executeTime"/>
+        <result column="material" property="material"/>
+        <result column="description" property="description"/>
+        <result column="remark" property="remark"/>
+        <result column="unit" property="unit"/>
+    </resultMap>
+
+    <select id="selectSpareListByPage" resultMap="baseMapper" parameterType="com.jtech.toa.model.dto.products.SpareDto">
+        SELECT
+        aps.id,ISNULL(apsl.brand_lang, aps.brand) brand,ISNULL(apsl.model_lang, aps.model) model,aps.update_time,
+        aps.excute_time,aps.material,ISNULL(apsl.description_lang,aps.description) description,ISNULL(apsl.remark_lang,
+        aps.remark) remark,
+        aps.unit,ISNULL(apsl.type_lang,aps.type) [type],aps.classify
+        FROM
+        absen_product_spare aps
+        LEFT JOIN absen_product_spare_lang apsl
+        ON (aps.id = apsl.spare AND apsl.lang = #{query.lang})
+        WHERE 1 = 1
+        <if test="query != null">
+            <if test="query.material != null and query.material != ''">
+                AND material LIKE #{query.customerMaterialLike}
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND [type] LIKE #{query.customerTypeLike}
+            </if>
+            <if test="query.brand != null and query.brand != ''">
+                AND brand LIKE #{query.customerBrandLike}
+            </if>
+        </if>
+        ORDER BY aps.create_time DESC
+    </select>
+    <select id="selectSpareList" resultMap="baseMapper">
+        SELECT *
+        FROM
+        absen_product_spare
+    </select>
+    <select id="selectSpareByMaterial" resultMap="baseMapper">
+        SELECT *
+        FROM
+        absen_product_spare
+        WHERE material = #{material}
+    </select>
+
+    <select id="findSparesWithoutLangs" resultMap="baseMapper">
+        SELECT * FROM absen_product_spare p
+        WHERE NOT EXISTS (
+          SELECT 1 FROM absen_product_spare_lang l WHERE l.spare=p.id AND l.description_lang IS NOT NULL
+        )
+    </select>
+
+    <select id="selectByProduct" resultType="com.jtech.toa.model.dto.products.ProductSpareDto">
+        WITH t AS (
+        SELECT sp.id, sp.brand, sp.model, sp.material, 0 AS product,st.standard,
+        sp.description, sp.type, sp.unit, st.cal_type_two AS type2Year,
+        st.spel_two AS spel2Year, st.counts_two AS count2Year, st.cal_type_three AS type3Year,
+        st.spel_three AS spel3Year, st.counts_three AS count3Year, st.cal_type_four AS type4Year,
+        st.spel_four AS spel4Year, st.counts_four AS count4Year, st.cal_type_five AS type5Year,
+        st.spel_five AS spel5Year, st.counts_five AS count5Year,
+        p.sale_price,p.price AS cost_price,p.unit AS money_unit
+        FROM absen_product_spare sp
+        JOIN absen_product_standard st ON sp.id=st.spare AND st.product=#{product}
+        <if test="standard!=-1">
+            AND st.standard=#{standard}
+        </if>
+        <if test="type!=-1">
+            AND st.type=#{type}
+        </if>
+        LEFT JOIN absen_product_spare_price p ON p.spare=sp.id AND p.area=#{area}
+        UNION
+        SELECT sp.id, sp.brand, sp.model, sp.material, (CASE WHEN st.series=#{series} THEN 1 ELSE 2 END) AS product,
+        st.standard, sp.description, sp.type, sp.unit, st.cal_type_two AS type2Year,
+        st.spel_two AS spel2Year, st.counts_two AS count2Year, st.cal_type_three AS type3Year,
+        st.spel_three AS spel3Year, st.counts_three AS count3Year, st.cal_type_four AS type4Year,
+        st.spel_four AS spel4Year, st.counts_four AS count4Year, st.cal_type_five AS type5Year,
+        st.spel_five AS spel5Year, st.counts_five AS count5Year,
+        p.sale_price, p.price AS cost_price,p.unit AS money_unit
+        FROM absen_product_spare sp
+        JOIN absen_product_series_standard st ON sp.id=st.spare AND st.series IN (
+        SELECT parent FROM absen_product_series WHERE id=#{series}
+        UNION SELECT id FROM absen_product_series WHERE id=#{series} )
+        <if test="standard!=-1">
+            AND st.standard=#{standard}
+        </if>
+        <if test="type!=-1">
+            AND st.type=#{type}
+        </if>
+        LEFT JOIN absen_product_spare_price p ON p.spare=sp.id AND p.area=#{area})
+        SELECT t.id,t.standard,ISNULL(spl.brand_lang,t.brand) brand,ISNULL(spl.model_lang,t.model),t.material,t.product,ISNULL(spl.description_lang,t.description) description,
+        ISNULL(spl.type_lang,t.type) [type],t.unit,t.type2Year,t.spel2Year,t.count2Year,t.type3Year,t.spel3Year,t.count3Year,t.type4Year,t.spel4Year,
+        t.count4Year,t.type5Year,t.spel5Year,t.count5Year,t.sale_price,t.cost_price,t.money_unit
+        FROM t
+        LEFT JOIN absen_product_spare_lang spl
+        ON (t.id = spl.spare AND spl.lang = #{lang})
+        WHERE NOT EXISTS (SELECT 1 FROM t t1 WHERE t1.id=t.id AND t.product > t1.product)
+    </select>
+
+
+    <select id="selectByProductWithClassify" resultType="com.jtech.toa.model.dto.products.ProductSpareDto">
+        WITH t AS (
+        SELECT sp.id, sp.brand, sp.model, sp.material, 0 AS product,st.standard,
+        sp.description, sp.type, sp.unit, st.cal_type_two AS type2Year,
+        st.spel_two AS spel2Year, st.counts_two AS count2Year, st.cal_type_three AS type3Year,
+        st.spel_three AS spel3Year, st.counts_three AS count3Year, st.cal_type_four AS type4Year,
+        st.spel_four AS spel4Year, st.counts_four AS count4Year, st.cal_type_five AS type5Year,
+        st.spel_five AS spel5Year, st.counts_five AS count5Year,
+        pt.sale_price,pt.price AS cost_price,pt.unit AS money_unit
+        FROM absen_product_spare sp
+        JOIN absen_product_standard st ON sp.id=st.spare AND st.product=#{product}
+        <if test="standard!=-1">
+            AND st.standard=#{standard}
+        </if>
+        <if test="type!=-1">
+            AND st.type=#{type}
+        </if>
+        LEFT JOIN (SELECT spd.id,spd.price,spd.sale_price,spd.spare,spd.unit,spa.area FROM absen_spare_price_details spd
+        INNER JOIN absen_spare_price_assign spa ON (spd.systems = spa.systems AND spa.area = #{area})) pt ON sp.id = pt.spare
+        <if test="type==2">
+            UNION
+            SELECT s.id,s.brand,s.model,s.material, 4 AS product,0 as standard,s.description,s.type,s.unit,
+            '' AS type2Year, '' AS spel2Year, 0 AS count2Year,
+            '' AS type3Year, '' AS spel3Year, 0 AS count3Year,
+            '' AS type4Year, '' AS spel4Year, 0 AS count4Year,
+            '' AS type5Year, '' AS spel5Year, 0 AS count5Year,
+            pt.sale_price,pt.price AS cost_price,pt.unit AS money_unit
+            FROM absen_product_spare s
+            LEFT JOIN (SELECT spd.id,spd.price,spd.sale_price,spd.spare,spd.unit,spa.area FROM absen_spare_price_details spd
+            INNER JOIN absen_spare_price_assign spa ON (spd.systems = spa.systems AND spa.area = #{area})) pt ON s.id = pt.spare
+            WHERE s.classify=2
+            <if test="standard==1">
+                AND s.standard=1
+            </if>
+        </if>
+        )
+        SELECT t.id,t.standard,ISNULL(spl.brand_lang,t.brand) brand,ISNULL(spl.model_lang,t.model),t.material,t.product,ISNULL(spl.description_lang,t.description) description,
+        ISNULL(spl.type_lang,t.type) [type],t.unit,t.type2Year,t.spel2Year,t.count2Year,t.type3Year,t.spel3Year,t.count3Year,t.type4Year,t.spel4Year,
+        t.count4Year,t.type5Year,t.spel5Year,t.count5Year,t.sale_price,t.cost_price,t.money_unit
+        FROM t
+        LEFT JOIN absen_product_spare_lang spl
+        ON (t.id = spl.spare AND spl.lang = #{lang})
+        WHERE NOT EXISTS (SELECT 1 FROM t t1 WHERE t1.id=t.id AND t.product > t1.product)
+    </select>
+
+
+    <select id="findSparesByProductIdsWithClassify" resultType="com.jtech.toa.model.dto.products.ProductSpareDto">
+        WITH t AS (
+        SELECT st.product productId, sp.id, sp.brand, sp.model, sp.material, 0 AS product,st.standard,
+        sp.description, sp.type, sp.unit, st.cal_type_two AS type2Year,
+        st.spel_two AS spel2Year, st.counts_two AS count2Year, st.cal_type_three AS type3Year,
+        st.spel_three AS spel3Year, st.counts_three AS count3Year, st.cal_type_four AS type4Year,
+        st.spel_four AS spel4Year, st.counts_four AS count4Year, st.cal_type_five AS type5Year,
+        st.spel_five AS spel5Year, st.counts_five AS count5Year,
+        pt.sale_price,pt.price AS cost_price,pt.unit AS money_unit
+        FROM absen_product_spare sp
+        JOIN absen_product_standard st ON sp.id=st.spare AND st.product = #{productId}
+        <if test="standard!=-1">
+            AND st.standard=#{standard}
+        </if>
+        <if test="type!=-1">
+            AND st.type=#{type}
+        </if>
+        LEFT JOIN (SELECT spd.id,spd.price,spd.sale_price,spd.spare,spd.unit,spa.area FROM absen_spare_price_details spd
+        INNER JOIN absen_spare_price_assign spa ON (spd.systems = spa.systems AND spa.area = #{area})) pt ON sp.id = pt.spare)
+        SELECT t.productId, t.product, t.id,t.standard,ISNULL(spl.brand_lang,t.brand) brand,ISNULL(spl.model_lang,t.model) AS model,t.material,ISNULL(spl.description_lang,t.description) description,
+        ISNULL(spl.type_lang,t.type) [type],t.unit,t.type2Year,t.spel2Year,t.count2Year,t.type3Year,t.spel3Year,t.count3Year,t.type4Year,t.spel4Year,
+        t.count4Year,t.type5Year,t.spel5Year,t.count5Year,t.sale_price,t.cost_price,t.money_unit
+        FROM t
+        LEFT JOIN absen_product_spare_lang spl
+        ON (t.id = spl.spare AND spl.lang = #{lang})
+        WHERE NOT EXISTS (SELECT 1 FROM t t1 WHERE t1.id=t.id AND t.product > t1.product) ORDER BY t.type, t.brand, t.model
+    </select>
+    
+    <select id="selectCommonSpares" resultType="com.jtech.toa.model.dto.products.ProductSpareDto">
+        SELECT
+            0 AS productId,
+            4 AS product,
+            s.id,
+            0 AS standard,
+            s.brand,
+            s.model,
+            s.material,
+            s.description,
+            s.type,
+            s.unit,
+            NULL AS type2Year,
+            '' AS spel2Year,
+            0 AS count2Year,
+            NULL AS type3Year,
+            '' AS spel3Year,
+            0 AS count3Year,
+            NULL AS type4Year,
+            '' AS spel4Year,
+            0 AS count4Year,
+            NULL AS type5Year,
+            '' AS spel5Year,
+            0 AS count5Year,
+            pt.sale_price,
+            pt.price AS cost_price,
+            pt.unit AS money_unit
+        FROM
+            absen_product_spare s
+        LEFT JOIN (
+            SELECT
+                spd.id,
+                spd.price,
+                spd.sale_price,
+                spd.spare,
+                spd.unit,
+                spa.area
+            FROM
+                absen_spare_price_details spd
+            INNER JOIN absen_spare_price_assign spa ON (
+                spd.systems = spa.systems
+                AND spa.area = #{area}
+            )
+        ) pt ON s.id = pt.spare
+        WHERE
+            s.classify = 2
+        ORDER BY
+        s.type, s.brand, s.model
+    </select>
+
+    <select id="selectIdByNo" resultType="Integer">
+        SELECT top 1 id FROM absen_product_spare WHERE material = #{no}
+    </select>
+
+    <select id="selectByIdAndLang" resultMap="baseMapper">
+        SELECT
+        aps.id,ISNULL(apsl.brand_lang, aps.brand) brand,ISNULL(apsl.model_lang, aps.model) model,aps.update_time,
+        aps.excute_time,aps.material,ISNULL(apsl.description_lang,aps.description) description,ISNULL(apsl.remark_lang,
+        aps.remark) remark,
+        aps.unit,ISNULL(apsl.type_lang,aps.type) [type],aps.classify
+        FROM absen_product_spare aps
+        LEFT JOIN absen_product_spare_lang apsl
+        ON (aps.id = apsl.spare AND apsl.lang = #{lang})
+        WHERE aps.id = #{id}
+    </select>
+
+    <select id="findAppSpares" resultType="com.jtech.toa.model.dto.products.AppSpares">
+        SELECT TOP 50 s.id,s.brand,s.model,s.material,s.description,s.type,s.unit,s.classify,
+          l.model_lang,l.brand_lang,l.description_lang,l.type_lang
+        FROM absen_product_spare s
+        LEFT JOIN absen_product_spare_lang l ON s.id=l.spare AND l.lang='en' WHERE s.id>#{lastId}
+    </select>
+
+    <select id="findAllAppSpares" resultType="com.jtech.toa.model.dto.products.AppSpares">
+        SELECT
+        s.id,
+        ISNULL(l.brand_lang, s.brand) brand,
+        ISNULL(l.model_lang,s.model) model,
+        s.material,
+        ISNULL(l.description_lang,s.description) AS description,
+        ISNULL(l.type_lang, s.type) AS type,
+        s.unit,
+        s.classify
+        FROM
+        absen_product_spare s
+        LEFT JOIN absen_product_spare_lang l ON s.id = l.spare
+        AND l.lang = #{lang}
+        WHERE
+        s.id >#{lastId}
+    </select>
+
+    <select id="findAppSparesPrice" resultType="com.jtech.toa.model.dto.prices.AppSparePrice">
+        SELECT
+            pt.id,
+            aps.id spare,
+            ISNULL(apsl.brand_lang, aps.brand) brand,
+            ISNULL(apsl.model_lang, aps.model) model,
+            ISNULL(apsl.type_lang, aps.type) [type],
+            pt.unit,
+            pt.sale_price salePrice,
+            pt.area,
+            ISNULL(
+                apsl.description_lang,
+                aps.description
+            ) description,
+            ISNULL(
+                apsl.remark_lang,
+                aps.remark
+            ) remark,
+            pt.price,
+            aps.update_time modifyTime,
+            aps.create_time createTime
+        FROM
+            absen_product_spare aps
+        LEFT JOIN (
+            SELECT
+                spd.id,
+                spd.price,
+                spd.sale_price,
+                spd.spare,
+                spd.unit,
+                spa.area
+            FROM
+                absen_spare_price_details spd
+            INNER JOIN absen_spare_price_assign spa ON (
+                spd.systems = spa.systems
+                AND spa.area = #{area}
+            )
+        ) pt ON aps.id = pt.spare
+        LEFT JOIN absen_product_spare_lang apsl ON (
+            apsl.spare = aps.id
+            AND apsl.lang = #{lang}
+        )
+        WHERE
+            aps.id > #{lastId}
+    </select>
+
+    <select id="findAllWithoutSpareLang" resultMap="baseMapper">
+        select * from absen_product_spare aps where aps.id not in
+        (
+            select apsl.spare from absen_product_spare_lang apsl
+        )
+    </select>
+
+    <select id="findAllWithoutSpareBrandLang" resultMap="baseMapper">
+        SELECT * FROM absen_product_spare p
+        WHERE NOT EXISTS (
+          SELECT 1 FROM absen_product_spare_lang l WHERE l.spare=p.id and l.lang = 'en' AND l.brand_lang IS NOT NULL
+        )
+    </select>
+
+    <select id="findAllWithoutSpareModelLang" resultMap="baseMapper">
+        SELECT * FROM absen_product_spare p
+        WHERE NOT EXISTS (
+          SELECT 1 FROM absen_product_spare_lang l WHERE l.spare=p.id
+          and l.lang = 'en' AND l.model_lang IS NOT NULL
+        )
+    </select>
+
+    <select id="findAllWithoutSpareTypeLang" resultMap="baseMapper">
+        SELECT * FROM absen_product_spare p
+        WHERE NOT EXISTS (
+          SELECT 1 FROM absen_product_spare_lang l WHERE l.spare=p.id and l.lang = 'en' AND l.type_lang IS NOT NULL
+        )
+    </select>
+</mapper>

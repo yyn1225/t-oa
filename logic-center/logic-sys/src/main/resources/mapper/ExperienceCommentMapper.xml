@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ExperienceCommentMapper">
+    <select id="getByShareIdForApp" resultType="com.jtech.toa.model.app.AppShareComment">
+        select aec.id as id,aec.share_id as shareId,aec.content as content,
+        aec.parent_id as parentId,ISNULL(aoul.name_lang,aou.name ) AS  createUser,
+        CONVERT(VARCHAR(24),aec.create_time,120) as createTime
+        from absen_experience_comment as aec LEFT JOIN absen_org_user as aou
+        on aec.create_user = aou.id  LEFT JOIN absen_org_user_lang aoul ON  aou.id = aoul.[user]
+        where aec.share_id = #{shareId} AND aoul.language = #{lang}
+    </select>
+
+    <select id="selectListByShareId" resultType="com.jtech.toa.model.dto.experience.ExperienceCommentDto">
+        select aec.id as id,aec.share_id as shareId,aec.content as content,aec.create_user as createId,
+        aec.parent_id as parentId,ISNULL(aoul.name_lang,aou.name ) AS  createUser,
+        CONVERT(VARCHAR(24),aec.create_time,120) as createTime
+        from absen_experience_comment as aec LEFT JOIN absen_org_user as aou
+        on aec.create_user = aou.id LEFT JOIN absen_org_user_lang aoul ON  aou.id = aoul.[user]
+         where aec.share_id = #{shareId} and aec.parent_id = #{parentId} AND aoul.language = #{lang}
+    </select>
+
+    <select id="selectListByMap" resultType="com.jtech.toa.model.dto.experience.CommentDto">
+        select aec.id as id,aec.share_id as shareId,aec.content as content,aec.create_user as createId,
+        aec.parent_id as parentId,ISNULL(aoul.name_lang,aou.name ) AS createUser, ISNULL(aoull.name_lang,pat.name ) AS  parentUser,
+        CONVERT(VARCHAR(24),aec.create_time,120) as createTime
+        from absen_experience_comment as aec
+        LEFT JOIN absen_org_user as aou
+        on aec.create_user = aou.id  LEFT JOIN absen_org_user_lang aoul ON  aou.id = aoul.[user]
+        LEFT JOIN absen_experience_comment parent
+        ON aec.parent_id = parent.id
+        LEFT JOIN absen_org_user as pat
+        on parent.create_user = pat.id  LEFT JOIN absen_org_user_lang aoull ON  pat.id = aoull.[user]
+        where aec.parent_id = #{parentId} and aec.parent_id = #{parentId} AND aoull.language = #{lang} AND aoul.language = #{lang}
+    </select>
+</mapper>

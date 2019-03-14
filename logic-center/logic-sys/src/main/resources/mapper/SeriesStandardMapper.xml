@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SeriesStandardMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.product.SeriesStandard">
+        <id column="id" property="id"/>
+        <result column="spare" property="spare"/>
+        <result column="series" property="series"/>
+        <result column="standard" property="standard"/>
+        <result column="counts_two" property="countsTwo"/>
+        <result column="type" property="type"/>
+        <result column="spel_two" property="spelTwo"/>
+        <result column="cal_type_two" property="calTypeTwo"/>
+        <result column="counts_three" property="countsThree"/>
+        <result column="spel_three" property="spelThree"/>
+        <result column="cal_type_three" property="calTypeThree"/>
+        <result column="counts_four" property="countsFour"/>
+        <result column="spel_four" property="spelFour"/>
+        <result column="cal_type_five" property="calTypeFive"/>
+        <result column="counts_five" property="countsFive"/>
+        <result column="spel_five" property="spelFive"/>
+        <result column="cal_type_four" property="calTypeFour"/>
+    </resultMap>
+
+    <resultMap id="standardDtoMapper" type="com.jtech.toa.model.dto.products.StandardDto">
+        <id column="id" property="id"/>
+        <result column="brand" property="brand"/>
+        <result column="model" property="model"/>
+        <result column="excute_time" property="executeTime"/>
+        <result column="material" property="material"/>
+        <result column="description" property="description"/>
+        <result column="remark" property="remark"/>
+        <result column="unit" property="unit"/>
+        <result column="sid" property="sid"/>
+        <result column="num" property="num"/>
+        <result column="styType" property="styType"/>
+        <result column="formula" property="formula"/>
+        <result column="standard" property="standard"/>
+    </resultMap>
+
+    <select id="selectBySeriesIdAndSpareId" resultMap="BaseResultMap">
+		SELECT top 1 * FROM absen_product_series_standard WHERE series = #{seriesId} AND spare =
+		#{spareId}
+	</select>
+
+    <select id="selectStandardListByPage" resultMap="standardDtoMapper"
+            parameterType="com.jtech.toa.model.dto.products.StandardDto">
+        SELECT
+        sp.id,ISNULL(spl.brand_lang, sp.brand) brand,ISNULL(spl.model_lang, sp.model) model,sp.excute_time,sp.material,
+        ISNULL(spl.description_lang,sp.description) description,ISNULL(spl.remark_lang,sp.remark) remark,sp.unit,
+        ISNULL(spl.type_lang,sp.type) [type],st.id sid,
+        st.counts_two as num,st.type as styType,st.spel_two as formula
+        FROM
+        absen_product_series_standard st
+        LEFT JOIN absen_product_spare sp
+        ON st.spare = sp.id
+        LEFT JOIN absen_product_spare_lang spl
+        ON sp.id = spl.spare AND spl.lang = #{query.lang}
+        WHERE 1=1
+        <if test="query!=null">
+            <if test="query.type !=null and query.type !=0">
+                AND st.type LIKE #{query.type}
+            </if>
+            <if test="query.series !=null and query.series !=0">
+                AND st.series = #{query.series}
+            </if>
+        </if>
+    </select>
+</mapper>

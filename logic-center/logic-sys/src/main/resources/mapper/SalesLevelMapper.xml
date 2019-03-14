@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SalesLevelMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.customer.Level">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="org" property="org"/>
+        <result column="discount" property="discount"/>
+        <result column="profit" property="profit"/>
+    </resultMap>
+
+    <select id="selectLevelListByPage" resultMap="BaseResultMap" parameterType="com.jtech.toa.model.query.SalesLevelQuery">
+        SELECT
+        ISNULL(l.name_lang,s.name) AS name,
+        s.id,
+        s.code,
+        s.discount,
+        s.profit
+        FROM
+        absen_sales_levels s
+        LEFT JOIN absen_sales_levels_lang l ON l.level = s.id AND l.lang = #{query.lang}
+        WHERE 1 = 1
+        <if test="query != null">
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE #{query.customerNameLike}
+            </if>
+            <if test="query.code != null and query.code !=''">
+                AND code LIKE #{query.customerCodeLike}
+            </if>
+            <if test="query.area != null">
+                AND org = #{query.area}
+            </if>
+        </if>
+    </select>
+
+    <select id="findByCodeAndIdNotEq" resultMap="BaseResultMap">
+        SELECT * FROM absen_sales_levels
+        WHERE code = #{code}
+        <![CDATA[
+        AND id <> #{id}
+        ]]>
+    </select>
+    <select id="findByCode" resultMap="BaseResultMap">
+        SELECT * FROM absen_sales_levels
+        WHERE code = #{code}
+    </select>
+
+    <select id="selectByIdAndLang" resultMap="BaseResultMap">
+        SELECT ISNULL(asll.name_lang, asl.name) name ,
+        asl.id,
+        asl.code,
+        asl.discount,
+        asl.profit
+        FROM absen_sales_levels_lang asll
+        INNER JOIN absen_sales_levels asl
+        ON asll.level = asl.id
+        WHERE asll.level = #{levelId}
+        AND asll.lang = #{lang}
+    </select>
+
+    <select id="findByCustomerId" resultMap="BaseResultMap">
+        SELECT * FROM absen_sales_levels l
+        JOIN absen_sales_customer c ON c.rating=l.id AND c.id=#{customer}
+    </select>
+</mapper>

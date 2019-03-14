@@ -1,0 +1,69 @@
+{
+  "_widget_name_1501337271161": "费用报销申请-财务类-杨友峰-2017-08-16",
+  "_widget_name_1501337289397": "JT-费用报销-20170816-00004",
+  "_widget_name_1501337336547": "杨友峰",
+  "_widget_name_1501337357630": "合肥协同事业部",
+  "_widget_name_1501337387963": {
+    "value": "现金",
+    "text": "现金",
+    "record": {
+      "text": "现金",
+      "value": "现金"
+    }
+  },
+  "_widget_name_1501337437891": {
+    "value": "项目类",
+    "text": "项目类",
+    "record": {
+      "text": "项目类",
+      "value": "项目类"
+    }
+  },
+  "_widget_name_1501337493154": {
+    "value": "442",
+    "text": "扬力优化项目",
+    "record": {
+      "end_day": 0,
+      "projectManager": "",
+      "code": "2222017080510",
+      "start_day": 0,
+      "name": "扬力优化项目",
+      "typeName": "SAP项目",
+      "en_name": "",
+      "typeId": "386",
+      "id": "442",
+      "status": ""
+    }
+  },
+  "_widget_name_1501337544444": {
+    "value": "人民币(RMB)",
+    "text": "人民币(RMB)",
+    "record": {
+      "text": "人民币(RMB)",
+      "value": "人民币(RMB)"
+    }
+  },
+  "_widget_name_1501337577745": {
+    "value": "上海",
+    "text": "上海",
+    "record": {
+      "text": "上海",
+      "value": "上海"
+    }
+  },
+  "_widget_name_1501337716654": 2,
+  "_widget_name_1501337738750": "9",
+  "_widget_name_1501337754444": [],
+  "_widget_name_1501337783560": [
+    {
+      "_widget_name_1501337787925": "2017-08-14",
+      "_widget_name_1501337792491": "1",
+      "_widget_name_1501337797205": 1,
+      "_widget_name_1501337800715": 2,
+      "_widget_name_1501337802167": 2,
+      "_widget_name_1501337815386": 2,
+      "_widget_name_1501337818941": 2,
+      "_widget_name_1501337826872": 9
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SpecialMapper">
+    <select id="selectSpecialList" resultType="com.jtech.toa.entity.product.Special">
+        SELECT * FROM absen_product_special
+    </select>
+
+    <select id="selectListBySeries" resultType="com.jtech.toa.entity.product.Special">
+        SELECT * FROM absen_product_special
+        WHERE id IN (
+          SELECT DISTINCT(request) FROM absen_product WHERE series=#{series}
+        )
+    </select>
+</mapper>

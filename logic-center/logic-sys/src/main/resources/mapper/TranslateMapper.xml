@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.system.TranslateMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.system.Translate">
+		<id column="id" property="id" />
+		<result column="code" property="code" />
+		<result column="category" property="category" />
+		<result column="chinese" property="chinese" />
+		<result column="language" property="language" />
+		<result column="translate" property="translate" />
+		<result column="creater" property="creater" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+
+	<select id="getForList" resultMap="BaseResultMap">
+		SELECT * from absen_sys_language_translate
+	</select>
+
+</mapper>

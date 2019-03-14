@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.RoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.system.Role">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="role" property="role"/>
+        <result column="status" property="status"/>
+        <result column="creater" property="creater"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectRoleByPage" resultType="com.jtech.toa.model.dto.sys.RoleDto"
+            parameterType="com.jtech.toa.model.query.RoleQuery">
+        SELECT * FROM (SELECT
+        ISNULL( l.name_lang,r.name) AS name,
+        r.id,
+        r.role,
+        r.status,
+        r.create_time createTime,
+        u.name username
+        FROM
+        absen_org_role r
+        LEFT JOIN absen_org_user u
+        ON r.creater = u.id
+        LEFT JOIN absen_org_role_lang l
+        ON l.role = r.id
+        AND l.language = #{query.language}) tmp
+        WHERE tmp.status = #{query.status}
+        <if test="query.name != null and query.name != ''">
+            AND tmp.name LIKE #{query.customerNameLike}
+        </if>
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+		SELECT id,name FROM absen_org_role WHERE status=1
+	</select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT id,role FROM absen_org_role aor WHERE status = 1
+        AND EXISTS (SELECT 1 FROM absen_org_role_user aoru WHERE aoru.role = aor.id AND
+        aoru.users = ${userId})
+    </select>
+
+    <select id="selectRoleSecurity" resultType="com.jtech.toa.model.dto.files.FileSecurityRoleDto">
+        SELECT a.id,a.name,b.security
+        FROM absen_org_role a
+        LEFT JOIN absen_file_security_role b
+        ON (a.id = b.role AND b.[file] = #{file})
+        WHERE a.status = 1
+    </select>
+
+    <select id="selectUserRoleList" resultType="com.jtech.toa.user.model.dto.UserRoleDto">
+        SELECT u.id userId,u.name username, r.id roleId, r.name roleName
+        FROM absen_org_user u
+        LEFT JOIN absen_org_role_user ru
+        ON u.id = ru.[users]
+        LEFT JOIN absen_org_role r
+        ON ru.role = r.id WHERE u.id = #{userId}
+    </select>
+
+    <select id="selectRoleList" resultMap="BaseResultMap">
+        SELECT *
+        FROM absen_org_role
+        WHERE status = 1
+    </select>
+</mapper>

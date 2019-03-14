@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ModuleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.product.Module">
+        <id column="id" property="id"/>
+        <result column="scn_no" property="scnNo"/>
+        <result column="height" property="height"/>
+        <result column="width" property="width"/>
+        <result column="transverse" property="transverse"/>
+        <result column="portrait" property="portrait"/>
+        <result column="pitch" property="pitch"/>
+        <result column="density" property="density"/>
+        <result column="lamp" property="lamp"/>
+        <result column="configuration" property="configuration"/>
+        <result column="weight" property="weight"/>
+    </resultMap>
+    <select id="selectModuleListByPage" resultMap="BaseResultMap"
+            parameterType="com.jtech.toa.model.dto.products.ModuleDto">
+        SELECT
+        apm.id,apm.scn_no,apm.height,apm.width,apm.transverse,apm.portrait,apm.pitch,apm.density,apm.lamp,
+        ISNULL(apml.type,apm.configuration) AS configuration,apm.weight
+        FROM
+        absen_product_modual apm
+        LEFT JOIN absen_product_modual_lang apml
+        ON (apm.id = apml.modual and apml.lang = #{query.lang})
+        WHERE 1 = 1
+        <if test="query.scnNo != null and query.scnNo != ''">
+            AND apm.scn_no LIKE #{query.customerScnNoLike}
+        </if>
+        <if test="query.configuration != null and query.configuration != ''">
+            AND (ISNULL(apml.type,apm.configuration) LIKE #{query.customerConfigurationLike})
+        </if>
+        ORDER BY apm.create_time DESC
+    </select>
+
+    <select id="selectModuleScnNoList" resultMap="BaseResultMap"
+            parameterType="com.jtech.toa.model.dto.products.ModuleDto">
+        SELECT
+        id,scn_no
+        FROM
+        absen_product_modual
+    </select>
+
+    <select id="selectModuleByScnNo" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        absen_product_modual
+        WHERE
+        scn_no = #{scnNo}
+    </select>
+
+    <select id="selectByIdAndLang" resultMap="BaseResultMap">
+        SELECT
+        apm.id,apm.scn_no,apm.height,apm.width,apm.transverse,apm.portrait,apm.pitch,apm.density,apm.lamp,
+        ISNULL(apml.type,apm.configuration) AS configuration,apm.weight,apm.remark
+        FROM absen_product_modual apm
+        LEFT JOIN absen_product_modual_lang apml
+        ON (apm.id = apml.modual AND apml.lang = #{lang})
+        WHERE apm.id = #{id}
+    </select>
+
+    <select id="selectTop50List" resultType="com.jtech.toa.model.dto.products.AppModules">
+        SELECT TOP 50 m.id,m.scn_no,m.height,m.width,m.transverse,m.portrait,
+        m.pitch,m.density,m.lamp,m.configuration,m.weight,m.description,
+        l.type AS configuration_lang
+        FROM dbo.absen_product_modual AS m
+        LEFT JOIN dbo.absen_product_modual_lang AS l ON l.modual = m.id AND l.lang='en'
+        WHERE m.id>#{lastId} ORDER BY m.id
+    </select>
+
+    <select id="findAllWithoutModuleLang" resultMap="BaseResultMap">
+        SELECT * FROM absen_product_modual apm
+           WHERE NOT EXISTS (
+              SELECT 1 FROM absen_product_modual_lang apml WHERE apml.modual=apm.id and apml.lang = 'en' AND apml.type IS NOT NULL
+          )
+    </select>
+</mapper>

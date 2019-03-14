@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.PriceMapper">
+    <select id="selectByProductAndArea" resultType="com.jtech.toa.entity.product.Price">
+        SELECT * FROM absen_product_price WHERE product = #{product} AND area = #{area}
+    </select>
+    <select id="selectAreaPrice" resultType="com.jtech.toa.model.dto.products.PanelPriceDto">
+        SELECT
+        d.name,d.id areaId,p.price,p.id priceId,p.sale_price,p.area,p.unit
+        FROM
+        absen_org_department d
+        LEFT JOIN absen_product_price p ON (d.id = p.area AND p.product = #{productId})
+        where d.level = 2 AND d.status = 1
+    </select>
+
+    <select id="findAppProductPrices" resultType="com.jtech.toa.model.dto.prices.AppProductPrice">
+        SELECT TOP 100 d.id, d.panel,d.price,d.modual,d.unit,p.price AS cost,a.area FROM absen_prices_details d
+        JOIN absen_price_assign a ON a.systems=d.systems AND a.area=#{area}
+        LEFT JOIN absen_product_price p on p.product=d.panel AND p.area=#{area}
+        WHERE d.id>#{lastId}
+        ORDER BY d.id
+    </select>
+    <select id="findAppAllProductPrices" resultType="com.jtech.toa.model.dto.prices.AppProductPrice">
+        select apd.*,apa.area from absen_prices_details apd left join
+        absen_price_assign apa on apd.systems = apa.systems
+        left join absen_org_department_user aodu on aodu.department = apa.area
+        where aodu.users = #{userId} and apd.id > #{lastId}
+    </select>
+</mapper>

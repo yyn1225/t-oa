@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.user.dao.DepartmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.user.entity.Department">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="parent" property="parent"/>
+        <result column="leader" property="leader"/>
+        <result column="assistanter" property="assistanter"/>
+        <result column="creater" property="creater"/>
+        <result column="create_time" property="createTime"/>
+        <result column="level" property="level"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT
+            ISNULL(l.name_lang,d.name) AS name,
+            d.id,
+            d.status,
+            d.code,
+            d.parent,
+            d.leader
+            FROM
+            absen_org_department d
+            LEFT JOIN absen_org_department_lang l ON l.department = d.id AND l.lang = #{lang}
+            WHERE d.status = 1
+    </select>
+
+    <select id="selectByLikeName" resultMap="BaseResultMap">
+		SELECT * FROM (SELECT
+            ISNULL( l.name_lang,d.name) AS name,
+            d.id,
+            d.status,
+            d.code,
+            d.parent
+        FROM
+            absen_org_department d
+        LEFT JOIN absen_org_department_lang l ON l.department = d.id AND l.lang = #{lang}
+        ) tmp WHERE tmp.name LIKE #{likeName} AND tmp.status = 1
+	</select>
+
+    <select id="selectByPagination" resultType="com.jtech.toa.user.model.dto.DepartmentDto">
+        SELECT
+            ISNULL(l.name_lang,d.name ) AS name,
+            d.level,
+            d.id,
+            p.name parentName,
+            d.status,
+            aou.name leaderName,
+            c.name createName,
+            d.create_time createTime,
+            u.name updateName,
+            d.update_time updateTime
+        FROM
+            absen_org_department d
+        LEFT JOIN absen_org_department_lang l ON l.department = d.id AND l.lang = #{lang}
+        LEFT JOIN (
+            SELECT
+                ISNULL(ll.name_lang,dd.name ) AS name,
+                dd.level,
+                dd.id
+            FROM
+                absen_org_department dd
+            LEFT JOIN absen_org_department_lang ll ON ll.department = dd.id AND ll.lang = #{lang}
+
+        ) p ON p.id = d.parent
+        LEFT JOIN absen_org_user aou ON aou.id = d.leader
+        LEFT JOIN absen_org_user c ON c.id = d.creater
+        LEFT JOIN absen_org_user u ON u.id = d.updater
+        WHERE 1 = 1
+    </select>
+    <select id="searchByPagination" resultType="com.jtech.toa.user.model.dto.DepartmentDto">
+        SELECT
+        ISNULL(l.name_lang,d.name ) AS name,
+        d.level,
+        d.id,
+        p.name parentName,
+        d.status,
+        aou.name leaderName,
+        c.name createName,
+        d.create_time createTime,
+        u.name updateName,
+        d.update_time updateTime
+        FROM
+        absen_org_department d
+        LEFT JOIN absen_org_department_lang l ON l.department = d.id AND l.lang = #{lang}
+        LEFT JOIN (
+        SELECT
+        ISNULL( ll.name_lang,dd.name) AS name,
+        dd.level,
+        dd.id
+        FROM
+        absen_org_department dd
+        LEFT JOIN absen_org_department_lang ll ON ll.department = dd.id AND ll.lang = #{lang}
+        ) p ON p.id = d.parent
+        LEFT JOIN absen_org_user aou ON aou.id = d.leader
+        LEFT JOIN absen_org_user c ON c.id = d.creater
+        LEFT JOIN absen_org_user u ON u.id = d.updater
+        WHERE 1=1
+        <if test="query!=null">
+            <if test="query.parentId!=0">
+                AND d.parent = #{query.parentId}
+            </if>
+            <if test="query.name!=null and query.name!=''">
+                AND (d.name LIKE #{query.nameLike} OR l.name_lang LIKE #{query.nameLike})
+            </if>
+        </if>
+    </select>
+
+    <select id="selectTopDepartmentList" resultMap="BaseResultMap">
+        SELECT
+        id,name,code,parent,leader,assistanter,creater,create_time,[level],status
+        FROM
+        absen_org_department
+        where (level = 1 or level = 2) and status = 1
+    </select>
+
+    <select id="selectByCode" resultMap="BaseResultMap">
+        SELECT top 1 id,name,code,parent,leader,assistanter,creater,create_time,[level],status
+        FROM absen_org_department
+        WHERE code = #{code}
+    </select>
+    <select id="selectByCodeAndIdNotEq" resultMap="BaseResultMap">
+        SELECT top 1 id,name,code,parent,leader,assistanter,creater,create_time,[level],status
+        FROM absen_org_department
+        WHERE code = #{code} AND id != #{id}
+    </select>
+    <update id="remove">
+        UPDATE absen_org_department SET status = 0 WHERE id = #{id}
+    </update>
+    <select id="selectParentById" resultMap="BaseResultMap">
+        SELECT aod.id,aod.[name],aod.code,aod.parent,aod.leader,aod.assistanter,aod.creater,aod.create_time,aod.[level],aod.status
+        FROM absen_org_department aod INNER JOIN absen_org_department aod2 ON aod.id = aod2.parent
+        WHERE aod.[level] = 2 AND aod2.id = #{id}
+    </select>
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT id,name,code,parent,leader,assistanter,creater,create_time,[level],status
+        FROM absen_org_department
+        WHERE status = 0 AND parent = #{parentId}
+    </select>
+
+    <select id="selectOneById" resultType="com.jtech.toa.user.model.dto.DepartmentDto">
+        SELECT a.id,a.name,a.code,a.leader,a.parent,b.name parentName,a.remark,a.level
+        FROM absen_org_department a LEFT JOIN absen_org_department b
+        ON a.parent = b.id
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="selectListByArea" resultType="com.jtech.toa.user.model.dto.SecurityUserDto">
+        SELECT d.id, d.name, d.parent
+        FROM absen_org_department d
+        WHERE d.id IN (SELECT DISTINCT u.area FROM absen_org_user u)
+    </select>
+
+    <select id="selectApprovalList" resultType="com.jtech.toa.user.model.dto.DepartmentApprovalDto">
+        SELECT d.id departmentId,d.name,d.level,d.leader,u.name leaderName,c.id,c.area,c.approval,c.condition,c.auditor,c.export
+        FROM absen_org_department d
+        INNER JOIN absen_org_user u
+        ON d.leader = u.id
+        LEFT JOIN absen_approval_config c
+        ON d.id = c.area
+        WHERE d.level = 2
+    </select>
+
+    <select id="selectDepartmentByUser" resultType="com.jtech.toa.user.entity.Department">
+        SELECT
+        aod.id as id,
+        aod.code as code,
+        ISNULL( l.name_lang,aod.name) as [name],
+        aod.parent as parent,
+        aod.leader  as leader,
+        aod.assistanter  as assistanter,
+        aod.creater  as creater,
+        aod.create_time  as createTime,
+        aod.level  as [level],
+        aod.status  as status
+         FROM  absen_org_department aod
+         LEFT JOIN absen_org_department_lang l ON  aod.id  =  l.department AND l.lang = #{lang}
+        INNER JOIN absen_org_department_user aodu
+        ON aod.id = aodu.department
+        WHERE aodu.[users] = #{userId}
+        AND aod.level = 3
+    </select>
+
+    <select id="selectDeptByIds" resultMap="BaseResultMap">
+        SELECT TOP 1 * FROM
+        absen_org_department
+        WHERE id IN
+        <foreach item="idItem" collection="deptIdList" open="("  separator=","  close=")">
+            #{idItem}
+        </foreach>
+        ORDER BY level
+    </select>
+
+    <select id="selectDataByUser" resultMap="BaseResultMap">
+        SELECT * FROM absen_org_department aod
+        INNER JOIN absen_org_department_user aodu
+        ON aod.id = aodu.department AND  aodu.users = #{user}
+    </select>
+    <select id="selectChildList" resultMap="BaseResultMap">
+        SELECT * FROM absen_org_department WHERE [level] = 3 or level = 2
+    </select>
+
+    <select id="selectAppArea" resultType="com.jtech.toa.user.model.dto.AppAreas">
+        SELECT d.id,d.code,d.name,l.name_lang,ps.unit FROM absen_org_department d
+        JOIN absen_org_department_user du ON du.department=d.id AND du.users=#{userId}
+        LEFT JOIN absen_org_department_lang l ON l.department=d.id AND l.lang='en'
+        LEFT JOIN absen_price_assign ag ON ag.area=d.id
+        LEFT JOIN absen_price_system ps ON ag.systems=ps.id
+        WHERE d.[level]=3
+    </select>
+</mapper>

@@ -1,0 +1,81 @@
+.loginbgm{
+    width: 100%;
+    height: 70%;
+    background:url("../img/login-bg.jpg") no-repeat;
+    background-size:cover;
+    position: relative;
+}
+#extr-page #main{
+    background:transparent;
+    position: absolute;
+    right: 16%;
+    top:48px;
+}
+#extr-page #main{
+    width: 320px;
+    height: 400px;
+}
+.well{
+    height: 400px;
+    background: #fff;
+    border-radius: 4px;
+}
+.client-form header{
+    background: transparent;
+    color:#0070ca;
+    font-weight: 700;
+}
+.smart-form footer{
+    background:#fff;
+    border-top:none;
+}
+label.input{
+    border-radius:3px;
+}
+.smart-form .input .icon-append+input{
+    padding:13px 10px 13px 33px;
+    border-radius: 3px;
+}
+.smart-form .input .icon-append+input{
+    height: auto;
+}
+.smart-form .icon-append{
+    left: 2px;
+    border:none;
+    font-size: 24px;
+    top:12px;
+}
+.smart-form footer .btn{
+    width: 100%;
+    padding:8px 0;
+    background:#0070ca ;
+    height: auto;
+    font-weight: 900;
+    font-size: 18px;
+}
+.smart-form .input .icon-append+input[type=password]{
+    margin:24px 0 25px 0;
+}
+h1{
+    margin:0;
+    padding:20px 0;
+    background: #fff;
+}
+h1 img{
+    width: 200px;
+    height: auto;
+    margin-left: 200px;
+}
+#content{
+    padding: 0 14px;
+}
+#extr-page #main{
+    padding-top: 0;
+
+}
+.myfooter{
+    color:#999;
+    padding-top: 100px;
+    text-align: center;
+    background: #fff;
+}

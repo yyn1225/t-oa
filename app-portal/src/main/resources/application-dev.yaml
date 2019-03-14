@@ -1,0 +1,157 @@
+
+###################  oa配置  ###################
+oa:
+  kaptcha-open: false #是否开启登录时验证码 (true/false)
+#  media-path: /Users/sog/iDevelop/iData/oa  #文件上传目录(不配置的话为java.io.tmpdir目录)
+  session-invalidate-time: 1800 #session失效时间 单位：秒
+  session-validation-interval: 900 #多久检测一次失效的session 单位：秒
+  shiro: false
+  sso-client-id: APP004
+  sso-secret: c36b2a430437898b76bfaeac8058b230
+  sso-url: http://113.108.97.119:8800/
+  media-url: http://ast.absen.com:9001/ #深圳
+#  media-url: http://54.178.16.252:9001/ #东京
+  is-synchronization-data: true  #深圳
+#  is-synchronization-data: false #东京
+  sms: false
+  mail-expired-time: 120 # 过期时长 单位: 秒
+  deploy-server-path: http://192.168.1.56:9091/
+  media-path: E:\saleTool\files\ #深圳
+#  media-path: D:\files\ #东京
+  internal-server-path: http://localhost:9091/
+  foreign-server-path: http://localhost:9091/
+  connect-oa-crm-interface: false
+
+###################  项目启动端口  ###################
+server:
+  display-name: TOA-PROTAL
+  port: 9091
+  error:
+    whitelabel:
+      enabled: false
+  compression:
+    min-response-size: 512 #压缩文件最小大小(kb)
+    enabled: true #是否压缩
+    mime-types: text/html,text/css,text/javascript,application/javascript,image/gif,image/png,image/jpg #要压缩的文件格式
+
+
+###################  spring配置  ###################
+spring:
+  cache:
+    type: redis
+  messages:
+    basename: i18n/messages   # 设置国际化配置文件存放在classpath:/i18n目录下
+    cache-seconds: 3600       #设置加载资源的缓存失效时间，-1表示永久有效，默认为-1
+    encoding: utf-8           #设定message bundles编码方式，默认为UTF-8
+  mvc:
+    static-path-pattern: /static/**
+    view:
+      prefix: /view/
+      suffix: .ftl
+  freemarker:
+    template-loader-path: classpath:/view/, classpath:/templates/*
+    cache: false
+  http:
+    encoding:
+      force: true
+    converters:
+      preferred-json-mapper: fastjson
+    multipart:
+      max-request-size: 100MB #最大请求大小
+      max-file-size: 100MB #最大文件大小
+  application:
+    name: TOA-Protal
+  resources:
+    chain:
+      cache: true
+      gzipped: true
+    cache-period: 60
+  redis:
+    # Redis数据库索引（默认为0）
+    database: 1
+    # Redis服务器地址
+    host: 127.0.0.1
+    # Redis服务器连接端口
+    port: 6379
+    # 连接池配置
+    pool:
+      # 连接池最大连接数（使用负值表示没有限制）
+      max-active: 8
+      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-wait: -1
+      # 连接池中的最大空闲连接
+      max-idle: 8
+      # 连接池中的最小空闲连接
+      min-idle: 0
+    # 连接超时时间（毫秒）
+    timeout: 0
+  datasource:
+     # 深圳
+    url: jdbc:sqlserver://192.168.100.119:1433;DatabaseName=absen_new
+    username: sa
+    password: abs
+     # 东京
+#    url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=Absen
+#    username: sa
+#    password: Netword%1344
+#    url: jdbc:sqlserver://192.168.1.4:1433;DatabaseName=absen_new
+#    username: sa
+#    password: 123123
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    type: com.alibaba.druid.pool.DruidDataSource
+    # druid 配置
+    druid:
+      #初始化连接大小
+      initialSize: 8
+      #最小空闲连接数
+      minIdle: 5
+      #最大连接数
+      maxActive: 10
+      WebStatFilter:
+        enabled: false
+  mail:
+#    host: smtp.163.com
+#    username: xujiuhuamoney@163.com
+#    password: test123
+    host: mail.absen.com
+    username: smartsales@absen.com
+    password: absen.20141204
+    default-encoding: UTF-8
+###################  mybatis-plus配置  ###################
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  typeAliasesPackage: com.jtech.toa.**.dao
+  global-config:
+    #主键类型  0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID";
+    id-type: 2
+    #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+    field-strategy: 2
+    #驼峰下划线转换
+    db-column-underline: true
+    #刷新mapper 调试神器
+    refresh-mapper: true
+    #数据库大写下划线转换
+    #capital-mode: true
+    #序列接口实现类配置
+    #key-generator: com.baomidou.springboot.xxx
+    #逻辑删除配置
+    logic-delete-value: 1
+    logic-not-delete-value: 0
+    #自定义填充策略接口实现
+    #meta-object-handler: com.baomidou.springboot.xxx
+    #自定义SQL注入器
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true #配置的缓存的全局开关
+    lazyLoadingEnabled: true #延时加载的开关
+    multipleResultSetsEnabled: true #开启的话，延时加载一个属性时会加载该对象全部属性，否则按需加载属性
+logging:
+  file: logs/t-oa-portal.log
+  level:
+    com.jtech.toa: debug
+    root: info
+template:
+  #模板服务器路径
+  export: E:\saleTool\files\template\export\
+  exportExcel: E:\saleTool\files\template\excel\

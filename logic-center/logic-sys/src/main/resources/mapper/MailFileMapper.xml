@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.MailFileMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.mail.MailFile">
+		<id column="id" property="id" />
+		<result column="url" property="url" />
+		<result column="create_time" property="createTime" />
+		<result column="expired_time" property="expiredTime" />
+		<result column="send_mail" property="sendMail" />
+		<result column="accept_mail" property="acceptMail" />
+		<result column="mail_subject" property="mailSubject" />
+	</resultMap>
+    <select id="findNoExpiredById" resultType="com.jtech.toa.entity.mail.MailFile">
+		SELECT
+		  amf.id,
+		  amf.url,
+		  amf.expired_time
+		FROM
+		  absen_mail_file amf
+		where
+		  amf.id = #{id} and
+		  <![CDATA[ datediff(second, amf.expired_time, getdate()) <= 0 ]]>
+	</select>
+
+</mapper>

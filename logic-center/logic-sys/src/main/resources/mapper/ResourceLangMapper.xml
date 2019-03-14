@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ResourceLangMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.system.ResourceLang">
+		<id column="id" property="id" />
+		<result column="resource" property="resource" />
+		<result column="language" property="language" />
+		<result column="name_lang" property="nameLang" />
+	</resultMap>
+	<select id="selectByResource" resultMap="BaseResultMap">
+		SELECT id,resource,[language],name_lang
+		FROM absen_org_resource_lang
+		WHERE resource = #{resourceId}
+	</select>
+	<delete id="deleteByResourceId">
+		DELETE FROM absen_org_resource_lang
+		WHERE resource = #{resourceId}
+	</delete>
+</mapper>

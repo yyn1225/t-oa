@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.OfferSpareSelfdefineMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.OfferSpareSelfdefine">
+		<id column="id" property="id" />
+		<result column="offers" property="offers" />
+		<result column="panel" property="panel" />
+		<result column="spare_type" property="spareType" />
+		<result column="brand" property="brand" />
+		<result column="price" property="price" />
+		<result column="amount" property="amount" />
+		<result column="type" property="type" />
+	</resultMap>
+
+</mapper>

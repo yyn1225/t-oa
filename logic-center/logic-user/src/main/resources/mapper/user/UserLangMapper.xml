@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.user.dao.UserLangMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.user.entity.UserLang">
+        <id column="id" property="id"/>
+        <result column="user" property="user"/>
+        <result column="language" property="language"/>
+        <result column="name_lang" property="nameLang"/>
+        <result column="nick_name_lang" property="nickNameLang"/>
+    </resultMap>
+
+    <resultMap id="LangMaps" type="com.jtech.toa.user.model.dto.UserLangDto">
+        <result column="name" property="name"/>
+        <result column="lang" property="lang"/>
+        <result column="company" property="company"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="LangMaps">
+		SELECT [language] AS lang,name_lang AS name, company_lang AS company
+		FROM absen_org_user_lang WHERE [user] = #{userId}
+	</select>
+    <select id="selectInLang" resultType="String">
+        SELECT top 1 language FROM absen_org_user_lang
+        WHERE [user] = #{userId}
+        <if test="lang!=null and lang!=''">
+            AND language =#{lang}
+        </if>
+        <if test="!(lang!=null and lang!='')">
+            AND 1!=1
+        </if>
+
+    </select>
+
+    <update id="updateByUserIdAndLang" parameterType="com.jtech.toa.user.entity.UserLang">
+        UPDATE absen_org_user_lang SET name_lang = #{userLang.nameLang}
+        WHERE [user] = #{userLang.user} AND language = #{userLang.language}
+    </update>
+    <insert id="insertUserId" parameterType="com.jtech.toa.user.entity.UserLang">
+INSERT INTO absen_org_user_lang   ( [user],  language,  name_lang )
+VALUES   ( #{userLang.user},  #{userLang.language},  #{userLang.nameLang} )
+    </insert>
+</mapper>

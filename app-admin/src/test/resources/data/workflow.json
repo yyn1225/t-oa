@@ -1,0 +1,113 @@
+{
+  "enable": true,
+  "nodeSettings": [
+    {
+      "ntype": "start",
+      "nodeId": "StartEvent_1",
+      "title": "流程开始节点",
+      "desc": ""
+    },
+    {
+      "ntype": "end",
+      "nodeId": "EndEvent_1evstbh",
+      "title": "流程结束节点",
+      "desc": ""
+    },
+    {
+      "title": "节点1",
+      "desc": "2212",
+      "approverType": 1,
+      "ntype": "task",
+      "nodeId": "Task_0obc093",
+      "assignUsers": [
+        "59240af1c872010b38dbfd12.张继铜",
+        "59240af1c872010b38dbfd10.杨友峰"
+      ]
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_1l0im0b"
+    },
+    {
+      "title": "节点2",
+      "desc": "",
+      "approverType": 3,
+      "ntype": "task",
+      "nodeId": "Task_186swd4"
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_04tzwqd"
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "judge",
+      "nodeId": "ExclusiveGateway_0p17esf"
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_1x6vnev"
+    },
+    {
+      "title": "节点3",
+      "desc": "",
+      "approverType": 4,
+      "ntype": "task",
+      "nodeId": "Task_0dpnaw2",
+      "conditionsItems": [
+        {
+          "ao": "and",
+          "judge": "=",
+          "value": "22",
+          "users": [
+            "59240af1c872010b38dbfd10.杨友峰",
+            "59240af1c872010b38dbfd12.张继铜"
+          ],
+          "formItemWidgetName": "_widget_name_1500618481021"
+        }
+      ]
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_11ftqy2"
+    },
+    {
+      "title": "节点4",
+      "desc": "",
+      "approverType": 2,
+      "ntype": "task",
+      "nodeId": "Task_159xtmm"
+    },
+    {
+      "title": "金额>10",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_1z0t0t0"
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_07ygufx"
+    },
+    {
+      "title": "",
+      "desc": "",
+      "ntype": "line",
+      "nodeId": "SequenceFlow_0k92tw4"
+    }
+  ],
+  "attr": {
+    "allowRevoke": false
+  },
+  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:omgdi=\"http://www.omg.org/spec/DD/20100524/DI\" xmlns:omgdc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" id=\"sid-38422fae-e03e-43a3-bef4-bd33b32041b2\" targetNamespace=\"http://bpmn.io/bpmn\" exporter=\"http://bpmn.io\" exporterVersion=\"0.10.1\"><process id=\"Process_1\" isExecutable=\"false\"><startEvent id=\"StartEvent_1\" name=\"流程开始节点\"><outgoing>SequenceFlow_1l0im0b</outgoing></startEvent><endEvent id=\"EndEvent_1evstbh\" name=\"流程结束节点\"><incoming>SequenceFlow_07ygufx</incoming><incoming>SequenceFlow_0k92tw4</incoming></endEvent><task id=\"Task_0obc093\" name=\"节点1\"><incoming>SequenceFlow_1l0im0b</incoming><outgoing>SequenceFlow_04tzwqd</outgoing></task><sequenceFlow id=\"SequenceFlow_1l0im0b\" sourceRef=\"StartEvent_1\" targetRef=\"Task_0obc093\" /><task id=\"Task_186swd4\" name=\"节点2\"><incoming>SequenceFlow_04tzwqd</incoming><outgoing>SequenceFlow_1x6vnev</outgoing></task><sequenceFlow id=\"SequenceFlow_04tzwqd\" sourceRef=\"Task_0obc093\" targetRef=\"Task_186swd4\" /><exclusiveGateway id=\"ExclusiveGateway_0p17esf\"><incoming>SequenceFlow_1x6vnev</incoming><outgoing>SequenceFlow_11ftqy2</outgoing><outgoing>SequenceFlow_1z0t0t0</outgoing></exclusiveGateway><sequenceFlow id=\"SequenceFlow_1x6vnev\" sourceRef=\"Task_186swd4\" targetRef=\"ExclusiveGateway_0p17esf\" /><task id=\"Task_0dpnaw2\" name=\"节点3\"><incoming>SequenceFlow_11ftqy2</incoming><outgoing>SequenceFlow_0k92tw4</outgoing></task><sequenceFlow id=\"SequenceFlow_11ftqy2\" sourceRef=\"ExclusiveGateway_0p17esf\" targetRef=\"Task_0dpnaw2\" /><task id=\"Task_159xtmm\" name=\"节点4\"><incoming>SequenceFlow_1z0t0t0</incoming><outgoing>SequenceFlow_07ygufx</outgoing></task><sequenceFlow id=\"SequenceFlow_1z0t0t0\" name=\"金额&#62;10\" sourceRef=\"ExclusiveGateway_0p17esf\" targetRef=\"Task_159xtmm\" /><sequenceFlow id=\"SequenceFlow_07ygufx\" sourceRef=\"Task_159xtmm\" targetRef=\"EndEvent_1evstbh\" /><sequenceFlow id=\"SequenceFlow_0k92tw4\" sourceRef=\"Task_0dpnaw2\" targetRef=\"EndEvent_1evstbh\" /></process><bpmndi:BPMNDiagram id=\"BpmnDiagram_1\"><bpmndi:BPMNPlane id=\"BpmnPlane_1\" bpmnElement=\"Process_1\"><bpmndi:BPMNShape id=\"StartEvent_1_gui\" bpmnElement=\"StartEvent_1\"><omgdc:Bounds x=\"343\" y=\"123\" width=\"30\" height=\"30\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"263\" y=\"131\" width=\"66\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNShape><bpmndi:BPMNShape id=\"EndEvent_1evstbh_di\" bpmnElement=\"EndEvent_1evstbh\"><omgdc:Bounds x=\"340.26428571428573\" y=\"347\" width=\"36\" height=\"36\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"262\" y=\"358\" width=\"66\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNShape><bpmndi:BPMNShape id=\"Task_0obc093_di\" bpmnElement=\"Task_0obc093\"><omgdc:Bounds x=\"413\" y=\"134\" width=\"100\" height=\"80\" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id=\"SequenceFlow_1l0im0b_di\" bpmnElement=\"SequenceFlow_1l0im0b\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"372\" y=\"138\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"393\" y=\"138\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"393\" y=\"174\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"413\" y=\"174\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"408\" y=\"149\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge><bpmndi:BPMNShape id=\"Task_186swd4_di\" bpmnElement=\"Task_186swd4\"><omgdc:Bounds x=\"600\" y=\"195\" width=\"100\" height=\"80\" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id=\"SequenceFlow_04tzwqd_di\" bpmnElement=\"SequenceFlow_04tzwqd\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"513\" y=\"174\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"557\" y=\"174\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"557\" y=\"235\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"600\" y=\"235\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"572\" y=\"197.5\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge><bpmndi:BPMNShape id=\"ExclusiveGateway_0p17esf_di\" bpmnElement=\"ExclusiveGateway_0p17esf\" isMarkerVisible=\"true\"><omgdc:Bounds x=\"614\" y=\"313\" width=\"50\" height=\"50\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"639\" y=\"366\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNShape><bpmndi:BPMNEdge id=\"SequenceFlow_1x6vnev_di\" bpmnElement=\"SequenceFlow_1x6vnev\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"650\" y=\"275\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"650\" y=\"294\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"639\" y=\"294\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"639\" y=\"313\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"644.5\" y=\"272\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge><bpmndi:BPMNShape id=\"Task_0dpnaw2_di\" bpmnElement=\"Task_0dpnaw2\"><omgdc:Bounds x=\"445\" y=\"280\" width=\"100\" height=\"80\" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id=\"SequenceFlow_11ftqy2_di\" bpmnElement=\"SequenceFlow_11ftqy2\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"614\" y=\"338\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"580\" y=\"338\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"580\" y=\"320\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"545\" y=\"320\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"595\" y=\"322\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge><bpmndi:BPMNShape id=\"Task_159xtmm_di\" bpmnElement=\"Task_159xtmm\"><omgdc:Bounds x=\"471\" y=\"406\" width=\"100\" height=\"80\" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id=\"SequenceFlow_1z0t0t0_di\" bpmnElement=\"SequenceFlow_1z0t0t0\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"639\" y=\"363\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"639\" y=\"446\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"571\" y=\"446\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"634\" y=\"398\" width=\"41\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge><bpmndi:BPMNEdge id=\"SequenceFlow_07ygufx_di\" bpmnElement=\"SequenceFlow_07ygufx\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"471\" y=\"446\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"424\" y=\"446\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"424\" y=\"365\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"376\" y=\"365\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"439\" y=\"398.5\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge><bpmndi:BPMNEdge id=\"SequenceFlow_0k92tw4_di\" bpmnElement=\"SequenceFlow_0k92tw4\"><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"445\" y=\"320\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"411\" y=\"320\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"411\" y=\"365\" /><omgdi:waypoint xsi:type=\"omgdc:Point\" x=\"376\" y=\"365\" /><bpmndi:BPMNLabel><omgdc:Bounds x=\"426\" y=\"335.5\" width=\"0\" height=\"13\" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></definitions>"
+}

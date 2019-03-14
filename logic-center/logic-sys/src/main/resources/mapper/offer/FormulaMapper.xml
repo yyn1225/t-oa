@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.FormulaMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.Formula">
+		<id column="id" property="id" />
+		<result column="offer" property="offer" />
+		<result column="panel" property="panel" />
+		<result column="spare" property="spare" />
+		<result column="spel_two" property="spelTwo" />
+		<result column="spel_three" property="spelThree" />
+		<result column="spel_four" property="spelFour" />
+		<result column="spel_five" property="spelFive" />
+	</resultMap>
+
+	<select id="selectFormulaByOffer" resultType="com.jtech.toa.entity.offer.OfferFormula">
+		SELECT
+			panel AS product,
+			spare AS offerSpare,
+			count_two AS count2,
+			type_two AS type2,
+			spel_two AS spel2,
+			count_three AS count3,
+			type_three AS type3,
+			spel_three AS spel3,
+			count_four AS count4,
+			type_four AS type4,
+			spel_four AS spel4,
+			count_five AS count5,
+			type_five AS type5,
+			spel_five AS spel5
+		FROM
+			absen_offer_spares_formula
+		WHERE
+			offer = #{offer}
+	</select>
+</mapper>

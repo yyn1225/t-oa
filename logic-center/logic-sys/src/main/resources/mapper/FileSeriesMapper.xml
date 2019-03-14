@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.FileSeriesMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.file.FileSeries">
+		<result column="series" property="series" />
+		<result column="files" property="files" />
+	</resultMap>
+	<delete id="deleteByFileId">
+		DELETE FROM absen_file_series WHERE files = #{fileId}
+	</delete>
+
+	<select id="selectSeriesIdsByFileId" resultType="Integer">
+		SELECT series FROM absen_file_series WHERE files = #{fileId}
+	</select>
+
+	<select id="selectAppFileSeries" resultType="com.jtech.toa.model.dto.files.AppFileSeries">
+		SELECT TOP 1000 t.* FROM (SELECT ROW_NUMBER() over(order by files,series) AS id,files,series FROM absen_file_series) t
+		WHERE t.id>#{lastId}
+	</select>
+</mapper>

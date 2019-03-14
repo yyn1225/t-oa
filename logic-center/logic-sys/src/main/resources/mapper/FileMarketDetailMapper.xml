@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.FileMarketDetailMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.file.FileMarketDetail">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="parent" property="parent" />
+		<result column="create_time" property="createTime" />
+		<result column="update_time" property="updateTime" />
+	</resultMap>
+
+	<select id="selectSpareListAll" resultMap="BaseResultMap">
+		SELECT
+			afmd.id,
+			ISNULL(afmdl.name_lang, afmd.name) name,
+			afmd.parent,
+			afmd.create_time,
+			afmd.update_time
+		FROM
+			absen_file_market_detail afmd
+		LEFT JOIN absen_file_market_detail_lang afmdl ON (afmd.id = afmdl.detail AND afmdl.lang = #{query.lang})
+		WHERE 1=1
+		ORDER BY afmd.create_time DESC
+	</select>
+
+	<select id="findAppMarketList" resultType="com.jtech.toa.model.dto.files.AppFileMarket">
+		SELECT d.id,d.name,l.name_lang FROM absen_file_market_detail d
+		LEFT JOIN absen_file_market_detail_lang l ON d.id=l.detail AND l.lang='en'
+	</select>
+
+	<select id="findApiAppMarketList" resultType="com.jtech.toa.model.dto.files.AppFileMarket">
+		SELECT d.id,ISNULL(l.name_lang,d.name) name FROM absen_file_market_detail d
+		LEFT JOIN absen_file_market_detail_lang l ON d.id=l.detail AND l.lang=#{lang}
+	</select>
+</mapper>

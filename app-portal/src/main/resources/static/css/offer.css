@@ -1,0 +1,352 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+input[type="number"]{
+    -moz-appearance: textfield;
+}
+
+#service_part .select2-container .select2-choice {
+    height: 29px !important;
+}
+.stepshow.activate {
+    right: 0 !important;
+    box-shadow: -11px 12px 23px rgba(0, 0, 0, .2);
+    padding: 5px 10px 10px;
+}
+
+.stepshow {
+    position: absolute;
+    top: 5px;
+    right: 0;
+    width: 380px;
+    z-index: 902;
+    background: #F1DA91;
+}
+
+.param-table td.text-align-right {
+    border-right: 1px dashed #00000033;
+}
+
+.stepshow.activate > span {
+    left: -30px;
+}
+
+.stepshow > span {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: block;
+    height: 30px;
+    width: 30px;
+    border-radius: 5px 0 0 5px;
+    background: #F1DA91;
+    padding: 2px;
+    text-align: center;
+    line-height: 28px;
+    cursor: pointer;
+}
+
+.smart-form fieldset[role] a.btn-sm, .smart-form fieldset[tag] a.btn-sm {
+    margin-right: 5px;
+}
+
+.jarviswidget {
+    margin: 0 0 10px;
+}
+
+.smart-form fieldset {
+    padding-top: 2px;
+}
+
+.smart-form fieldset a {
+    margin-bottom: 2px;
+}
+
+.smart-form header {
+    font-size: 14px;;
+}
+
+.swiper-container, .swiper-slide {
+    min-height: 255px;
+}
+
+.smart-form header {
+    padding-bottom: 0;
+    font-size: 15px;
+    color: #828282;
+}
+
+/*.table td {*/
+/*border-top: 1px dashed rgba(0, 0, 0, .2) !important;*/
+/*}*/
+
+.table {
+    width: 90%;
+}
+
+/*.table .no-border td {*/
+/*border-top: 0 !important;*/
+/*}*/
+
+.smart-form section label {
+    padding-top: 5px;;
+}
+
+.table > tbody > tr > td {
+    padding: 5px 10px !important;
+}
+
+header {
+    cursor: auto !important;
+}
+
+.ui-spinner-button.ui-spinner-down.ui-corner-br {
+    margin-bottom: 0;
+    background-color: #ababab;
+}
+
+.ui-spinner-button.ui-spinner-up.ui-corner-tr {
+    margin-top: 0;
+    background-color: #ababab;
+    padding-top: 2px;
+}
+
+.padding7 {
+    padding-top: 7px;
+}
+
+.input-group .input-group-addon {
+    padding-left: 3px;
+    padding-right: 0;
+    border: 0;
+    background-color: #fff;
+    padding-top: 3px;
+    width: 25px;
+}
+
+.long-label {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    width: 11.3% !important;
+}
+
+.larger-label {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    width: 17.9% !important;
+}
+
+.short-label {
+    padding-left: 3px !important;
+    width: 5.3% !important;
+    padding-right: 0 !important;
+}
+
+.no-left {
+    padding-left: 0 !important;
+}
+
+.no-right {
+    padding-right: 0 !important;
+}
+
+.no-left.no-right {
+    text-align: right;
+}
+
+.smart-form .ui-widget-content .ui-spinner-input {
+    padding-left: 3px;
+}
+
+.select2-hidden-accessible {
+    display: none;
+}
+
+/*.widget-body .smart-form fieldset .col.col-3 {*/
+    /*padding-left: 0 !important;*/
+/*}*/
+
+.right-span {
+    float: right;
+    padding-top: 7px;
+    padding-right: 25px;
+    color: #ff5757;
+}
+
+#choose_spare_dialog_customer label i {
+    margin-top: -3px;
+}
+
+.trash-a {
+    color: #666 !important;
+}
+
+.trash-a:hover {
+    color: #ff5757 !important;
+}
+
+.fa.fa-trash-o {
+    font-size: 15pt;
+    padding-top: 5px;
+    cursor: pointer;
+}
+
+.margin-left-10 {
+    margin-left: 10px;
+}
+
+.free, [tag="free_part"] [price] {
+    text-decoration: line-through;
+}
+
+.input-autosuggest {
+    width: 92%;
+    height: 32px;
+    border: 1px solid #c9ccd0;
+    padding: 0 4%;
+}
+
+.form-control {
+    height: 29px;
+}
+
+.smart-form fieldset + fieldset {
+    border-top: 0;
+}
+
+.drop-panel:hover {
+    color: #ff5757 !important;
+}
+
+
+.drop-panel {
+    color: #666 !important;
+    display: inline-block;
+    cursor: pointer;
+    margin-top: -7px;
+    margin-left: 5px;
+}
+
+.product-info-look .col-md-4 {
+    padding-right: 0;
+}
+
+.pading-seven {
+    padding-bottom: 7px;
+}
+
+.panel_certification, .panel_state {
+    font-weight: 700;
+}
+
+/*文字限制一行显示*/
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.list-group-item {
+    padding: 8px 10px;
+}
+.row {
+    margin-left: -12px;
+    margin-right: -12px;
+}
+.form-control{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.first-td {
+    border-top: 0 !important;
+}
+.acreage {
+    border: 0 !important;
+    width: 100%;
+}
+#choose_spare_list_ul .show-grid{
+    margin: 0 15px !important;
+}
+#choose_spare_list_ul tr:hover{
+    background-color: #efefef;
+}
+#choose_spare_list_ul table{
+    width: 99%;
+}
+#choose_spare_list_ul tbody tr td{
+    text-overflow: ellipsis; /* for IE */
+    -moz-text-overflow: ellipsis; /* for Firefox,mozilla */
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    height: 22px;
+}
+#choose_spare_list_ul table th .first-check{
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin-left: 5px;
+}
+#choose_spare_list_ul table th:first-child{
+}
+.font-diy{
+    font-size: 10px;
+}
+
+section.spare_search{
+    z-index: 999999999999;
+    background-color: #FFF;
+    padding-left: 0;
+    height: 52px;
+    position: absolute;
+}
+.choose_spare_table{
+    table-layout: fixed;
+}
+#choose_spare_dialog td .checkbox {
+    margin-top: -5px;
+}
+.ui-dialog.ui-widget.ui-widget-content.ui-corner-all.ui-front.ui-dialog-buttons.ui-draggable {
+    position: fixed !important;
+}
+
+.view-row {
+    border-bottom: 1px solid #ccc;
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.view-col {
+    /*height: 30px;*/
+    padding-top: 10px;
+}
+
+.as-wrapper .as-menu{
+    position: static; !important;
+}
+
+.text-spare {
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.spare-desc {
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #002060;
+}
+
+.view-desc {
+    font-weight: bold;
+}
+
+.view-spare-desc {
+    font-size: 11px;
+}
+
+.as-wrapper .as-menu{
+    position: absolute !important;
+}

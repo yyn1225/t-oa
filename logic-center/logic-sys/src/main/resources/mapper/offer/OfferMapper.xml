@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.OfferMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.Offer">
+		<id column="id" property="id" />
+		<result column="num" property="num" />
+		<result column="create_time" property="createTime" />
+		<result column="creater" property="creater" />
+		<result column="customer" property="customer" />
+		<result column="customer_name" property="customerName" />
+		<result column="payment" property="payment" />
+		<result column="shipping" property="shipping" />
+		<result column="guarantee" property="guarantee" />
+		<result column="waiting_date" property="waitingDate" />
+		<result column="trader" property="trader" />
+		<result column="money_unit" property="moneyUnit" />
+		<result column="version" property="version" />
+		<result column="status" property="status" />
+		<result column="valid" property="valid" />
+		<result column="size_unit" property="sizeUnit" />
+		<result column="project_name" property="projectName"/>
+		<result column="delete_flag" property="deleteFlag"/>
+		<result column="offere" property="offere"/>
+		<result column="update_time" property="updateTime"/>
+		<result column="updater" property="updater"/>
+		<result column="area" property="area"/>
+		<result column="size_type" property="sizeType"/>
+		<result column="total_price" property="totalPrice"/>
+		<result column="total_discount" property="totalDiscount"/>
+		<result column="service_price" property="servicePrice"/>
+		<result column="service_discount" property="serviceDiscount"/>
+		<result column="rate" property="rate"/>
+		<result column="special_price" property="specialPrice"/>
+		<result column="special_price_remark" property="specialPriceRemark"/>
+	</resultMap>
+
+	<select id="selectListByManager" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,aou.name username,ao.money_unit moneyUnit,ao.customer_name customerName,ao.total_discount
+		totalDiscount,ISNULL(ao.special_price, ao.total_price) totalPrice,ao.guarantee,
+		ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,ao.remark, ao.num, ao.status
+		offerStatus,ao.rate,aou2.name offere, ao.project_name projectName
+		FROM absen_offer ao
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_org_user aou2
+		ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		WHERE 1=1
+		AND ao.delete_flag = 0
+		<if test="query != null">
+			<if test="query.areaList != null">
+				AND ao.area IN
+				<foreach item="idItem" collection="query.areaList" open="(" separator="," close=")">
+					#{idItem}
+				</foreach>
+			</if>
+			<if test="query.getNum != null and query.getNum != ''">
+				AND ao.num LIKE #{query.numLike}
+			</if>
+			<if test="query.customerName != null and query.customerName != ''">
+				AND ao.customer_name LIKE #{query.customerNameLike}
+			</if>
+			<if test="query.payment != null and query.payment != ''">
+				AND ao.payment LIKE #{query.paymentLike}
+			</if>
+			<if test="query.remark != null and query.remark != ''">
+				AND ao.project_name LIKE #{query.remarkLike}
+			</if>
+			<if test="query.startTime != null and query.startTime != ''">
+				<![CDATA[
+				AND ao.create_time > #{query.parseStartTime}
+				]]>
+			</if>
+			<if test="query.endTime != null and query.endTime != ''">
+				<![CDATA[
+				AND ao.create_time < #{query.parseEndTime}
+				]]>
+			</if>
+			<if test="query.sales != null and query.sales != ''">
+				AND (aou.name LIKE #{query.salesLike} OR aou.email LIKE #{query.salesLike})
+			</if>
+			<if test="query.series != null">
+				AND EXISTS (
+				SELECT 1 FROM
+				absen_offer_panels p
+				INNER JOIN absen_product p2
+				ON (
+				p2.id = p.panel
+				AND p2.series IN
+				<foreach item="idItem" collection="query.series" open="(" separator="," close=")">
+					#{idItem}
+				</foreach>
+				) WHERE p.offer = ao.id)
+			</if>
+		</if>
+	    ORDER BY ao.create_time DESC
+	</select>
+
+	<select id="selectListByPage" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,aou.name username,ao.money_unit moneyUnit,ao.customer_name customerName,ao.total_discount
+		totalDiscount,ISNULL(ao.special_price, ao.total_price) totalPrice,ao.guarantee,
+		ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,ao.remark, ao.num, ao.status
+		offerStatus,ao.rate,aou2.name offere, ao.project_name projectName
+		FROM absen_offer ao
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_org_user aou2
+		ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		WHERE (ao.creater = #{query.userId} OR ao.offere = #{query.userId})
+		AND ao.delete_flag = 0
+		<if test="query != null">
+			<if test="query.getNum != null and query.getNum != ''">
+				AND ao.num LIKE #{query.numLike}
+			</if>
+			<if test="query.customerName != null and query.customerName != ''">
+				AND ao.customer_name LIKE #{query.customerNameLike}
+			</if>
+			<if test="query.payment != null and query.payment != ''">
+				AND ao.payment LIKE #{query.paymentLike}
+			</if>
+			<if test="query.remark != null and query.remark != ''">
+				AND ao.project_name LIKE #{query.remarkLike}
+			</if>
+			<if test="query.startTime != null and query.startTime != ''">
+				<![CDATA[
+				AND ao.create_time > #{query.parseStartTime}
+				]]>
+			</if>
+			<if test="query.endTime != null and query.endTime != ''">
+				<![CDATA[
+				AND ao.create_time < #{query.parseEndTime}
+				]]>
+			</if>
+			<if test="query.sales != null and query.sales != ''">
+				AND (aou.name LIKE #{query.salesLike} OR aou.email LIKE #{query.salesLike})
+			</if>
+			<if test="query.series != null">
+				AND EXISTS (
+                SELECT 1 FROM
+                absen_offer_panels p
+                INNER JOIN absen_product p2
+                ON (
+                p2.id = p.panel
+                AND p2.series IN
+				<foreach item="idItem" collection="query.series" open="(" separator="," close=")">
+					#{idItem}
+				</foreach>
+                ) WHERE p.offer = ao.id)
+			</if>
+		</if>
+	    ORDER BY ao.create_time DESC
+	</select>
+
+	<select id="selectPreferenceListByPage" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,aopr.id preferenceId,aopr.name preferenceName,aou.name username,ao.money_unit moneyUnit,ao.customer_name customerName,ao.total_discount totalDiscount,
+		ao.total_price totalPrice,ao.guarantee,ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,sl.name levelName,ao.remark, ao.num, ao.status offerStatus,ao.rate,ao.offere
+		FROM absen_offer ao
+		INNER JOIN absen_offer_preference aopr
+		ON (ao.id = aopr.offer AND aopr.creater = #{query.userId})
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+		WHERE 1=1
+		AND ao.delete_flag = 0
+		<if test="query != null">
+			<if test="query.getNum != null and query.getNum != ''">
+				AND ao.num LIKE #{query.numLike}
+			</if>
+			<if test="query.customerName != null and query.customerName != ''">
+				AND ao.customer_name LIKE #{query.customerNameLike}
+			</if>
+			<if test="query.payment != null and query.payment != ''">
+				AND ao.payment LIKE #{query.paymentLike}
+			</if>
+			<if test="query.remark != null and query.remark != ''">
+				AND ao.remark LIKE #{query.remarkLike}
+			</if>
+			<if test="query.startTime != null and query.startTime != ''">
+				<![CDATA[
+				AND ao.create_time > #{query.parseStartTime}
+				]]>
+			</if>
+			<if test="query.endTime != null and query.endTime != ''">
+				<![CDATA[
+				AND ao.create_time < #{query.parseEndTime}
+				]]>
+			</if>
+		</if>
+		ORDER BY ao.create_time DESC
+	</select>
+
+	<select id="selectOfferList" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,aou.name username,ao.money_unit moneyUnit,ao.customer_name customerName,ao.total_price totalPrice,ao.total_discount totalDiscount,
+		ao.guarantee,ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,sl.name levelName,ao.remark, ao.num, ao.status offerStatus,ao.rate
+		FROM absen_offer ao
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+		WHERE ao.creater = #{query.userId}
+		AND NOT EXISTS (SELECT * FROM absen_offer_preference aopr WHERE aopr.offer=ao.id)
+		AND ao.delete_flag = 0
+		ORDER BY ao.create_time DESC
+	</select>
+
+	<select id="selectMyApprovalList" resultType="com.jtech.toa.model.dto.offer.MyOfferDto">
+		SELECT TOP 4 o.id,o.customer_name customerName, o.total_price totalPrice,
+		o.total_discount totalDiscount, sl.name levelName, sl.discount levelDiscount, aou.name creater
+		FROM absen_offer o
+		INNER JOIN absen_approval_task aat
+		ON o.id = aat.orders
+		INNER JOIN absen_org_user aou
+		ON aat.creater = aou.id
+		LEFT JOIN absen_sales_customer sc
+		ON o.customer = sc.id
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+		WHERE aat.opt_user = #{userId}
+		AND aat.opt_status = 1
+		AND o.delete_flag = 0
+		ORDER BY o.create_time DESC
+	</select>
+
+	<select id="findApiOfferListByPage" resultType="com.jtech.toa.model.dto.offer.AppOfferDto">
+		SELECT TOP ${pageSize} * FROM (SELECT
+		ao.id,
+		ao.num quoteNum,
+		ao.area,
+		ao.customer_name customer,
+		ao.customer customerId,
+		sc.crm_id zohuID,
+		ao.status,
+		ao.total_price price,
+		ao.rate unit,
+		aou.name sales,
+		ao.offere salesId,
+		ao.creater createUserid,
+		ao.create_time createTime,
+		ao.updater modifyUserid,
+		ao.update_time modifyTime,
+		ao.offer_json offerJson,
+		aou2.name offere
+		FROM
+		absen_offer ao
+		INNER JOIN absen_org_user aou ON aou.id = ao.creater
+		LEFT JOIN absen_org_user aou2 ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl ON sc.rating = sl.id
+		WHERE
+		ao.delete_flag = 0
+		AND ao.creater = #{userId}
+		UNION
+		SELECT
+		ao.id,
+		ao.num quoteNum,
+		ao.area,
+		ao.customer_name customer,
+		ao.customer customerId,
+		sc.crm_id zohuID,
+		ao.status,
+		ao.total_price price,
+		ao.rate unit,
+		aou.name sales,
+		ao.offere salesId,
+		ao.creater createUserid,
+		ao.create_time createTime,
+		ao.updater modifyUserid,
+		ao.update_time modifyTime,
+		ao.offer_json offerJson,
+		aou2.name offere
+		FROM
+		absen_offer ao
+		INNER JOIN absen_org_user aou ON aou.id = ao.creater
+		LEFT JOIN absen_org_user aou2 ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl ON sc.rating = sl.id
+		WHERE
+		ao.delete_flag = 0
+		and ao.offere = #{userId}
+		) t
+		WHERE 1=1
+		<if test="lastId == 0">
+		AND t.id > #{lastId}
+		</if>
+		<if test="lastId != 0">
+		<![CDATA[
+		AND t.id < #{lastId}
+		]]>
+		</if>
+		<if test="status != null">
+			AND #{status} = t.status
+		</if>
+		ORDER BY t.id DESC
+	</select>
+
+	<select id="findApiOfferListByIds" resultType="com.jtech.toa.model.dto.offer.AppOfferDto">
+		SELECT * FROM (SELECT
+		ao.id,
+		ao.num quoteNum,
+		ao.area,
+		ao.customer_name customer,
+		ao.customer customerId,
+		sc.crm_id zohuID,
+		ao.status,
+		ao.total_price price,
+		ao.rate unit,
+		-- ao.exchange ,
+		aou.name sales,
+		ao.offere salesId,
+		ao.creater createUserid,
+		ao.create_time createTime,
+		ao.updater modifyUserid,
+		ao.update_time modifyTime,
+		ao.offer_json offerJson,
+		aou2.name offere
+		FROM
+		absen_offer ao
+		INNER JOIN absen_org_user aou ON aou.id = ao.creater
+		LEFT JOIN absen_org_user aou2 ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl ON sc.rating = sl.id
+		WHERE
+		ao.delete_flag = 0
+		UNION
+		SELECT
+		ao.id,
+		ao.num quoteNum,
+		ao.area,
+		ao.customer_name customer,
+		ao.customer customerId,
+		sc.crm_id zohuID,
+		ao.status,
+		ao.total_price price,
+		ao.rate unit,
+		-- ao.exchange ,
+		aou.name sales,
+		ao.offere salesId,
+		ao.creater createUserid,
+		ao.create_time createTime,
+		ao.updater modifyUserid,
+		ao.update_time modifyTime,
+		ao.offer_json offerJson,
+		aou2.name offere
+		FROM
+		absen_offer ao
+		INNER JOIN absen_org_user aou ON aou.id = ao.creater
+		LEFT JOIN absen_org_user aou2 ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl ON sc.rating = sl.id
+		WHERE
+		ao.delete_flag = 0) t WHERE 1=1
+		<if test="ids.size > 0">
+			AND t.id IN
+			<foreach item="idItem" collection="ids" open="("  separator=","  close=")">
+				#{idItem}
+			</foreach>
+		</if>
+		ORDER BY t.createTime DESC
+	</select>
+
+	<select id="getMyOfferList" resultType="com.jtech.toa.model.dto.offer.MyOfferDto">
+		SELECT TOP 10 o.id,o.customer_name customerName,o.total_price totalPrice,
+		o.total_discount totalDiscount,o.create_time,o.creater,o.money_unit,o.status,o.delete_flag
+		FROM absen_offer o
+		WHERE o.creater= #{userId}
+		 <if test="status!=-1">
+			AND o.status = #{status}
+		 </if>
+		<if test="lastId!=-1 and lastId!=0">
+			AND #{lastId}>o.id
+		</if>
+		AND o.delete_flag = 0
+		ORDER BY id DESC
+	</select>
+
+	<select id="selectMyOfferList" resultType="com.jtech.toa.model.dto.offer.MyOfferDto">
+		SELECT TOP 4 o.id,o.customer_name customerName, o.total_price totalPrice,
+		o.total_discount totalDiscount, sl.name levelName, sl.discount levelDiscount
+		FROM absen_offer o
+		LEFT JOIN absen_sales_customer sc ON o.customer = sc.id
+		LEFT JOIN absen_sales_levels sl ON sc.rating = sl.id
+		WHERE o.creater=#{userId}
+		AND o.delete_flag = 0
+		ORDER BY o.create_time DESC
+	</select>
+
+	<select id="selectOfferById" resultType="com.jtech.toa.model.dto.offer.MyOfferDto">
+		SELECT ao.total_price totalPrice, ao.total_discount totalDiscount, ao.customer_name customerName, aou.name creater,sl.name levelName
+	    FROM absen_offer ao
+	    INNER JOIN absen_org_user aou
+	    ON ao.creater = aou.id
+	    LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+	    WHERE ao.id = #{offerId}
+	    AND ao.delete_flag = 0
+	</select>
+
+	<select id="findOfferById" resultType="com.jtech.toa.model.dto.offer.MyOfferDto">
+		SELECT
+		ao.total_price totalPrice,
+		ao.total_discount totalDiscount,
+	  	ao.customer_name customerName,
+		aou.name creater,
+	  	sl.name levelName,
+	  	ISNULL(abdl.name_lang, abd.name) trader,
+	  	ISNULL(abdl2.name_lang, abd2.name) traderAddress,
+  		abd3.name traderPhone,
+	  	ao.size_unit sizeUnit,
+  		ao.waiting_date waitingDate,
+  		ao.payment,
+	  	ao.guarantee,
+  		ao.money_unit,
+  		ao.status,
+  		ao.project_name projectName,
+  		ao.remark
+		FROM
+			absen_offer ao
+		INNER JOIN absen_org_user aou ON ao.creater = aou.id
+		LEFT JOIN absen_sales_customer sc ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl ON sc.rating = sl.id
+		LEFT JOIN absen_basic_dict abd ON ( ao.trader = abd.code AND abd.category = 'trade_company')
+		LEFT JOIN absen_basic_dict_lang abdl ON (abd.id = abdl.dict AND abdl.lang = #{lang})
+		LEFT JOIN absen_basic_dict abd2 ON ( ao.trader = abd2.code AND abd2.category = 'trade_address')
+		LEFT JOIN absen_basic_dict_lang abdl2 ON (abd2.id = abdl2.dict AND abdl2.lang = #{lang})
+		LEFT JOIN absen_basic_dict abd3 ON ( ao.trader = abd3.code AND abd3.category = 'trade_phone' )
+		WHERE ao.id = #{offerId} AND ao.delete_flag = 0
+	</select>
+
+	<select id="selectApprovalList" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,aou.name username,ao.customer_name customerName,ao.total_price totalPrice,ao.total_discount totalDiscount,
+		ao.guarantee,ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,sl.name levelName,
+		aat.opt_result approvalResult,aat.id approvalId, aou2.name as offere, ao.rate, ao.remark
+		FROM absen_offer ao
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_org_user AS aou2
+		ON aou2.id = ao.offere
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		INNER JOIN absen_approval_task aat
+		ON (ao.id = aat.orders AND aat.opt_user = #{query.optUser})
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+		WHERE ao.delete_flag = 0
+		<if test="query != null">
+			<if test="query.userId != null and query.userId != 0">
+				AND aou.id = #{query.userId}
+			</if>
+			<if test="query.series != null">
+				AND ao.series IN
+				<foreach item="idItem" collection="query.series" open="("  separator=","  close=")">
+					#{idItem}
+				</foreach>
+			</if>
+			<if test="query.optUser != null and query.optUser != 0">
+				AND aat.opt_user = #{query.optUser}
+			</if>
+			<if test="query.status != null">
+				AND aat.opt_status = #{query.status}
+			</if>
+			<if test="query.examine != null">
+				AND aat.opt_status != #{query.examine}
+			</if>
+			<if test="query.customerName != null and query.customerName != ''">
+				AND ao.customer_name LIKE #{query.customerNameLike}
+			</if>
+		</if>
+		ORDER BY ao.create_time DESC
+	</select>
+
+	<select id="selectLaunchList" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,ao.num,ao.money_unit moneyUnit,ao.rate,aou.name username,ao.customer_name customerName,ao.total_price totalPrice,ao.total_discount totalDiscount,
+		ao.guarantee,ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,sl.name levelName,
+		aat.opt_result approvalResult,aat.id approvalId,aat.opt_status approvalStatus, ao.status offerStatus
+		FROM absen_offer ao
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		LEFT JOIN absen_approval_task aat
+		ON ao.id = aat.orders
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+		WHERE ao.delete_flag = 0
+		<if test="query != null">
+			<if test="query.userId != null and query.userId != 0">
+				AND aou.id = #{query.userId}
+			</if>
+			<if test="query.series != null">
+				AND ao.series IN
+				<foreach item="idItem" collection="query.series" open="("  separator=","  close=")">
+					#{idItem}
+				</foreach>
+			</if>
+			<if test="query.customerName != null and query.customerName != ''">
+				AND ao.customer_name LIKE #{query.customerNameLike}
+			</if>
+		</if>
+		ORDER BY ao.create_time DESC
+	</select>
+
+	<select id="selectAppPreferenceListByPage" resultType="com.jtech.toa.model.dto.offer.OfferListDto">
+		SELECT ao.id,aopr.id preferenceId,aopr.name preferenceName,aou.name username,ao.money_unit moneyUnit,ao.customer_name customerName,ao.total_discount totalDiscount,
+		ao.total_price totalPrice,ao.guarantee,ao.waiting_date waitingDate,ao.payment,ao.create_time createTime,sl.name levelName,ao.remark, ao.num, ao.status offerStatus,
+		ao.offer_json offerjson,ao.rate
+		FROM absen_offer ao
+		INNER JOIN absen_offer_preference aopr
+		ON (ao.id = aopr.offer AND aopr.creater = #{query.userId})
+		INNER JOIN absen_org_user aou
+		ON aou.id = ao.creater
+		LEFT JOIN absen_sales_customer sc
+		ON ao.customer = sc.id
+		LEFT JOIN absen_sales_levels sl
+		ON sc.rating = sl.id
+		WHERE 1=1
+		AND ao.delete_flag = 0
+		AND aopr.id > #{lastId}
+		ORDER BY ao.id ASC
+	</select>
+</mapper>

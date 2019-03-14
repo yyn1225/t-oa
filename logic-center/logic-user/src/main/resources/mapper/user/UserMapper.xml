@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.user.dao.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.user.entity.User">
+        <id column="id" property="id"/>
+        <result column="phone" property="phone"/>
+        <result column="name" property="name"/>
+        <result column="login_name" property="loginName"/>
+        <result column="avatar" property="avatar"/>
+        <result column="gender" property="gender"/>
+        <result column="create_time" property="createTime"/>
+        <result column="status" property="status"/>
+        <result column="password" property="password"/>
+        <result column="salt" property="salt"/>
+        <result column="delete_flag" property="deleteFlag"/>
+        <result column="email" property="email"/>
+        <result column="language" property="language"/>
+        <result column="language_default" property="languageDefault"/>
+    </resultMap>
+
+    <resultMap id="UserDtoMap" type="com.jtech.toa.user.model.dto.UserDto">
+        <id column="id" property="id"/>
+        <result column="phone" property="phone"/>
+        <result column="name" property="username"/>
+        <result column="login_name" property="loginName"/>
+        <result column="avatar" property="avatar"/>
+        <result column="create_time" property="createTime"/>
+        <result column="status" property="status"/>
+        <result column="password" property="password"/>
+        <result column="salt" property="salt"/>
+        <result column="delete_flag" property="deleteFlag"/>
+        <result column="email" property="email"/>
+        <result column="language" property="language"/>
+        <result column="area_name" property="areaName"/>
+        <result column="language_default" property="languageDefault"/>
+        <result column="delete_able" property="deleteAble"/>
+    </resultMap>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT top 1 id,name,login_name,work_no,password,salt,[language],
+          language_default,area,avatar,status,delete_flag,creater,create_time,
+          email,phone,company
+        FROM absen_org_user
+        WHERE login_name= #{username} OR phone= #{username} OR work_no=#{username}
+--         AND delete_flag=0
+    </select>
+
+    <select id="selectByPhone" resultMap="BaseResultMap">
+        SELECT top 1 id,name,login_name,work_no,password,salt,[language],
+          language_default,area,avatar,status,delete_flag,creater,create_time
+        FROM absen_org_user
+        WHERE phone= #{username}
+--          AND delete_flag=0
+    </select>
+
+    <select id="selectUserListByPage" resultMap="UserDtoMap">
+        SELECT u.id,u.name,u.work_no,u.login_name,u.password,
+            u.salt,u.avatar,u.creater,u.create_time,u.area,
+            u.status,u.delete_flag,u.phone,u.email,u.company,u.delete_able,
+            ISNULL(dl.name_lang, d.name) AS area_name,lg.name AS language_default, u2.name assistantName,
+        (SELECT
+        STUFF(
+        (
+        SELECT
+        ',' + aod.name
+        FROM
+        dbo.absen_org_department_user aodu
+        INNER JOIN absen_org_department aod ON aodu.department = aod.id
+        WHERE
+        aodu.users = u.id
+        AND aod.[level] = 3
+        FOR XML PATH ('')),1,1,'')
+        )
+        AS departmentName
+        FROM absen_org_user u
+        LEFT JOIN absen_org_department d ON d.id=u.area
+        LEFT JOIN absen_org_department_lang dl ON dl.department=d.id AND dl.lang=#{lang}
+        LEFT JOIN absen_sys_language lg ON lg.code=u.language_default
+        LEFT JOIN absen_org_user u2 ON u.assistant = u2.id
+        WHERE 1=1
+        <if test="query!=null">
+            <if test="query.name !=null and query.name !=''">
+                AND u.name LIKE #{query.customerNameLike}
+            </if>
+            <if test="query.workno !=null and query.workno !=''">
+                AND u.work_no LIKE #{query.customerWorknoLike}
+            </if>
+            <if test="query.phone !=null and query.phone !=''">
+                AND u.phone LIKE #{query.customerPhoneLike}
+            </if>
+            <if test="query.area != null  and query.area.size()>0">
+                AND u.area IN
+                <foreach collection="query.area" item="ids" open="(" separator="," close=")">
+                    #{ids}
+                </foreach>
+            </if>
+        </if>
+        <if test="listIds !=null and listIds.size()>0">
+            and u.id in ( select du.users from absen_org_department_user du
+            where du.department IN
+            <foreach collection="listIds" item="ids" open="(" separator="," close=")">
+                #{ids}
+            </foreach>
+            )
+        </if>
+    </select>
+    <select id="selectAllForSelect2" resultType="com.jtech.toa.user.model.dto.UserSelect2Dto">
+        SELECT aou.id,ISNULL(aoul.name_lang,aou.name ) AS name
+        FROM absen_org_user aou LEFT JOIN absen_org_user_lang aoul ON aoul.[user] = aou.id
+        AND aoul.language = #{lang} WHERE aou.status = 1
+    </select>
+
+    <select id="selectForAppByUserId" resultType="com.jtech.toa.user.model.dto.UserAppDto">
+        SELECT id userId,name,work_no workNo,language,area,
+        company,phone,avatar,email,language_default langDefault
+        FROM absen_org_user WHERE id = #{userId}
+    </select>
+
+    <select id="selectAllUser" resultMap="UserDtoMap">
+        select id,[name] FROM absen_org_user
+    </select>
+
+    <update id="deleteUser">
+        UPDATE absen_org_user SET delete_flag = 1 where id =#{id}
+    </update>
+
+    <update id="enableUser">
+        UPDATE absen_org_user SET delete_flag = 0 where id =#{id}
+    </update>
+
+    <select id="selectUserList" resultType="com.jtech.toa.user.model.dto.SecurityUserDto">
+        select id,[name],area parent FROM absen_org_user
+    </select>
+
+    <select id="getListByArea" resultType="com.jtech.toa.user.entity.User">
+        SELECT * FROM absen_org_user u
+        JOIN absen_org_department_user d ON d.users=u.id AND d.department=#{area}
+    </select>
+
+    <select id="findUsersByRole" resultType="com.jtech.toa.user.entity.User">
+        SELECT
+            aodu.id,
+            aodu.name,
+            aodu.work_no,
+            aodu.login_name,
+            aodu.password,
+            aodu.salt,
+            aodu.avatar,
+            aodu.creater,
+            aodu.create_time,
+            aodu.area,
+            aodu.status,
+            aodu.delete_flag,
+            aodu.phone,
+            aodu.email,
+            aodu.company,
+            aodu.delete_able
+        FROM
+            absen_org_user aodu
+        LEFT JOIN absen_org_role_user aoru ON aoru.users = aodu.id
+        WHERE
+            aoru.role = #{role}
+    </select>
+    <!--查找销售助理-->
+    <select id="selectUserAssistantListByPage" resultMap="UserDtoMap">
+        SELECT u.id,u.name,u.work_no,u.login_name,u.password,
+        u.salt,u.avatar,u.creater,u.create_time,u.area,
+        u.status,u.delete_flag,u.phone,u.email,u.company,u.delete_able,
+        ISNULL(dl.name_lang, d.name) AS area_name,lg.name AS language_default
+        FROM absen_org_user u
+        LEFT JOIN absen_org_department d ON d.id=u.area
+        LEFT JOIN absen_org_department_lang dl ON dl.department=d.id AND dl.lang=#{lang}
+        LEFT JOIN absen_sys_language lg ON lg.code=u.language_default
+        LEFT JOIN absen_org_role_user ru ON u.id = ru.users
+        LEFT JOIN absen_org_role r ON ru.role = r.id
+        WHERE 1=1 and r.name='销售助理'
+        <if test="query!=null">
+            <if test="query.name !=null and query.name !=''">
+                AND u.name LIKE #{query.customerNameLike}
+            </if>
+            <if test="query.workno !=null and query.workno !=''">
+                AND u.work_no LIKE #{query.customerWorknoLike}
+            </if>
+            <if test="query.phone !=null and query.phone !=''">
+                AND u.phone LIKE #{query.customerPhoneLike}
+            </if>
+        </if>
+    </select>
+
+    <update id="updateUserAssistant" >
+        UPDATE absen_org_user
+            set  assistant = NULL
+            where  id = #{user.id}
+    </update>
+
+    <select id="selectUserByIds" resultMap="UserDtoMap">
+        SELECT u.id,u.name,u.work_no,u.login_name,u.password,
+        u.salt,u.avatar,u.creater,u.create_time,u.area,
+        u.status,u.delete_flag,u.phone,u.email,u.company,u.delete_able
+         FROM absen_org_user u
+         where
+        id in
+        <foreach item="id" collection="ids" open="("  separator=","  close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

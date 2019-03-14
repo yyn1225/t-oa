@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SysExchangeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.system.SysExchange">
+		<id column="id" property="id" />
+		<result column="valid_date" property="validDate" />
+		<result column="sync_time" property="syncTime" />
+		<result column="currency" property="currency" />
+		<result column="rmb" property="rmb" />
+		<result column="code" property="code" />
+	</resultMap>
+
+	<select id="getLastExchange" resultMap="BaseResultMap">
+		SELECT b.id,b.valid_date,b.sync_time,b.currency,b.rmb,b.code FROM
+		(SELECT a.*,row_number() OVER (partition BY code ORDER BY valid_date DESC) rn
+		FROM absen_sys_exchange a) b WHERE rn=1
+	</select>
+</mapper>

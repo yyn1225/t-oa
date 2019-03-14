@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.OfferTransferMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.OfferTransfer">
+		<id column="id" property="id" />
+		<result column="orders" property="orders" />
+		<result column="from_address" property="fromAddress" />
+		<result column="to_address" property="toAddress" />
+		<result column="cost" property="cost" />
+		<result column="submiter" property="submiter" />
+		<result column="status" property="status" />
+		<result column="submit_time" property="submitTime" />
+		<result column="transport" property="transport" />
+		<result column="size" property="size" />
+	</resultMap>
+	
+	<select id="selectByPage" resultType="com.jtech.toa.model.dto.offer.OfferTransferDto">
+		SELECT aot.id,aps.name seriesName,aou.name bidder,aot.to_address toAddress,aot.transport,aot.size,ao.create_time createTime
+		FROM
+		absen_offer_transfer aot
+		INNER JOIN absen_offer ao
+		ON (aot.orders = ao.id AND ao.delete_flag = 0)
+		INNER JOIN absen_org_user aou
+		ON ao.creater = aou.id
+		INNER JOIN absen_product_series aps
+		ON ao.series = aps.id
+	</select>
+
+	<select id="selectOneById" resultType="com.jtech.toa.model.dto.offer.OfferTransferDto">
+		SELECT aot.id,aps.name seriesName,aot.cost,aou.name bidder,aot.to_address toAddress,aot.transport,aot.size,ao.create_time createTime,ao.money_unit moneyUnit,ao.customer_name customerName
+		FROM
+		absen_offer_transfer aot
+		INNER JOIN absen_offer ao
+		ON aot.orders = ao.id
+		INNER JOIN absen_org_user aou
+		ON ao.creater = aou.id
+		INNER JOIN absen_product_series aps
+		ON ao.series = aps.id
+		WHERE aot.id = #{id}
+		AND ao.delete_flag = 0
+	</select>
+</mapper>

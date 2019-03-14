@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.DictMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.basic.Dict">
+        <id column="id" property="id" />
+        <result column="category" property="category" />
+        <result column="code" property="code" />
+        <result column="parent" property="parent" />
+    </resultMap>
+    <select id="selectDictByCategory" resultMap="BaseResultMap">
+        SELECT
+            abd.id,
+            abd.category,
+            abd.code,
+            ISNULL(abdl.name_lang,abd.name) name,
+            abd.parent
+        FROM
+            absen_basic_dict abd
+        LEFT JOIN absen_basic_dict_lang abdl ON abd.id = abdl.dict AND abdl.lang = #{lang}
+        WHERE abd.category = #{category}
+    </select>
+
+    <select id="selectDictByCode" resultMap="BaseResultMap">
+         SELECT
+            abd.id,
+            abd.category,
+            abd.code,
+            ISNULL(abdl.name_lang,abd.name) name,
+            abd.parent
+        FROM
+            absen_basic_dict abd
+        LEFT JOIN absen_basic_dict_lang abdl ON abd.id = abdl.dict AND abdl.lang = #{lang}
+        WHERE abd.category = #{category} AND abd.code=#{code}
+    </select>
+</mapper>

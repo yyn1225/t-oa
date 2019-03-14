@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ProductMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.product.Product">
+        <id column="id" property="id"/>
+        <result column="configuration" property="configuration"/>
+        <result column="certification" property="certification"/>
+        <result column="part_no" property="partNo"/>
+        <result column="state" property="state"/>
+        <result column="series" property="series"/>
+        <result column="featured" property="featured"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="updater" property="updater"/>
+        <result column="execution_time" property="executionTime"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="color" property="color"/>
+        <result column="creater" property="creater"/>
+        <result column="create_time" property="createTime"/>
+        <result column="request" property="request"/>
+    </resultMap>
+
+    <select id="selectProductListByPage" resultType="com.jtech.toa.model.dto.products.ProductDto"
+            parameterType="com.jtech.toa.model.dto.products.ProductDto">
+        SELECT
+        a.id,a.box,a.part_no,a.state, a.featured,a.execution_time,d2.code,
+        a.certification,
+        ISNULL(cl.remark_lang,c.remark) AS productConfiguration,
+        s.name AS productSeries,
+        s2.name AS parentSeriesName,
+        ISNULL(abdl.name_lang,d.name) AS productType,
+        ISNULL(abdl2.name_lang,d2.name) AS productStatus,
+        ISNULL(l.color_lang, a.color) color,a.request,b.id salesId,b.status salesStatus
+        FROM absen_product a
+        LEFT JOIN absen_product_sales b ON a.id = b.product
+        LEFT JOIN absen_product_configuration c ON c.id = a.configuration
+        LEFT JOIN absen_product_certification e ON e.code = a.certification
+        JOIN absen_product_series s ON s.id = a.series
+        JOIN absen_product_series s2 ON s.parent = s2.id
+        LEFT JOIN absen_basic_dict d ON d.category = 'product_type' AND d.code = a.type
+        LEFT JOIN absen_basic_dict d2 ON d2.category = 'product_status' AND d2.code = a.status
+        LEFT JOIN absen_basic_dict_lang abdl ON (abdl.dict = d.id AND abdl.lang = #{query.lang})
+        LEFT JOIN absen_basic_dict_lang abdl2 ON (abdl2.dict = d2.id AND abdl2.lang = #{query.lang})
+        LEFT JOIN absen_product_lang l ON (a.id = l.product AND l.lang = #{query.lang})
+        LEFT JOIN absen_product_configuration_lang cl ON (c.id = cl.configuration AND cl.lang = #{query.lang})
+        WHERE s.status = 1
+        <if test="query != null">
+            <if test="query.partNo != '' and query.partNo !=null">
+                AND a.part_no LIKE #{query.customerPartNoLike}
+            </if>
+            <if test="query.configuration != 0 and query.configuration != '' and query.configuration != null">
+                AND a.configuration = #{query.configuration}
+            </if>
+            <if test="query.certification != '' and query.certification != null">
+                AND a.certification = #{query.certification}
+            </if>
+            <if test="query.certificationStr != '' and query.certificationStr != null">
+                AND a.certification LIKE #{query.certificationStrLike}
+            </if>
+            <if test="query.status != 0 and query.status != '' and query.status !=null">
+                AND a.status = #{query.status}
+            </if>
+            <if test="query.series != null">
+                AND a.series IN
+                <foreach item="idItem" collection="query.series" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            <if test="query.color != null and query.color != ''">
+                AND ISNULL(l.color_lang, a.color) LIKE #{query.colorLike}
+            </if>
+            <if test="query.featured != '' and query.featured != null">
+                AND a.featured = #{query.featured}
+            </if>
+            <if test="query.productId != 0 and query.productId != '' and query.productId != null">
+                AND s.id = #{query.productId}
+            </if>
+            <if test="query.productType != '' and query.productType != null">
+                AND d.code = #{query.productType}
+            </if>
+            <if test="query.parentSeries != 0 and query.parentSeries != '' and query.parentSeries != null">
+                AND s2.id = #{query.parentSeries}
+            </if>
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+    <select id="selectSkimProduct" resultType="com.jtech.toa.model.dto.products.SkimProductDto"
+            parameterType="com.jtech.toa.model.dto.products.ProductDto">
+        SELECT
+			s.name AS productSeries,ISNULL(cl.remark_lang, c.remark) AS productConfiguration,
+			a.certification AS certification,a.part_no AS partNo,'' AS releaseTime,
+			'' AS updateTime,ISNULL(abdl.name_lang, d.name) AS productType,
+			ISNULL(abdl2.name_lang, d2.name) AS productStatus,ISNULL(l.color_lang, a.color) AS color,
+			m.pitch AS pitch,p.control AS control,p.calibration AS calibration,
+			p.intelligent AS intelligent,p.rigging AS rigging,p.stack AS stack,
+			p.front AS front,p.fix_modual AS fixModual,p.fix_psu AS fixPsu,
+			box.width AS boxWidth,box.height AS boxHeight,box.thickness AS boxThickness,
+			box.weight AS boxWeight,box.box_type AS boxType,m.width AS modualWidth,
+			m.height AS modualHeight,m.weight AS modualWeight,p.ip_rating ASipRating,
+			p.brightness AS brightness,p.contrast_ratio AS contrastRatio,
+			p.gray_scale AS grayScale,p.refresh AS refresh,
+			p.viewing ASviewing,p.power_max AS powerMax,p.power_avg AS powerAvg,
+			m.configuration AS ledType,p.driving_type AS drivingType,
+			CAST (p.psu_power AS VARCHAR) + 'W*' + CAST (p.psu_count AS VARCHAR) AS psu,
+			p.standard_carry_high AS carryHigh,
+			p.standard_carry_lower AS carryLower,'' AS receivedCard
+		FROM
+			absen_product a
+		LEFT JOIN absen_product_sales b ON a.id = b.product
+		LEFT JOIN absen_product_configuration c ON c.id = a.configuration
+		LEFT JOIN absen_product_certification e ON e.code = a.certification
+		JOIN absen_product_series s ON s.id = a.series
+		JOIN absen_product_series s2 ON s.parent = s2.id
+		LEFT JOIN absen_basic_dict d ON d.category = 'product_type'
+		AND d.code = a.type
+		LEFT JOIN absen_basic_dict d2 ON d2.category = 'product_status'
+		AND d2.code = a.status
+		LEFT JOIN absen_basic_dict_lang abdl ON (
+			abdl.dict = d.id
+			AND abdl.lang = #{query.lang}
+		)
+		LEFT JOIN absen_basic_dict_lang abdl2 ON (
+			abdl2.dict = d2.id
+			AND abdl2.lang = #{query.lang}
+		)
+		LEFT JOIN absen_product_lang l ON (
+			a.id = l.product
+			AND l.lang = #{query.lang}
+		)
+		LEFT JOIN absen_product_configuration_lang cl ON (
+			c.id = cl.configuration
+			AND cl.lang = #{query.lang}
+		)
+		LEFT JOIN absen_product_params p ON a.id = p.product
+		LEFT JOIN absen_product_box box ON a.part_no = box.scn_no
+		LEFT JOIN absen_product_modual m ON box.modual = m.id
+        WHERE s.status = 1
+        <if test="query != null">
+            <if test="query.partNo != '' and query.partNo !=null">
+                AND a.part_no LIKE #{query.customerPartNoLike}
+            </if>
+            <if test="query.configuration != 0 and query.configuration != '' and query.configuration != null">
+                AND a.configuration = #{query.configuration}
+            </if>
+            <if test="query.certification != '' and query.certification != null">
+                AND a.certification = #{query.certification}
+            </if>
+            <if test="query.certificationStr != '' and query.certificationStr != null">
+                AND a.certification LIKE #{query.certificationStrLike}
+            </if>
+            <if test="query.status != 0 and query.status != '' and query.status !=null">
+                AND a.status = #{query.status}
+            </if>
+            <if test="query.series != null">
+                AND a.series IN
+                <foreach item="idItem" collection="query.series" open="("  separator=","  close=")">
+                    #{idItem}
+                </foreach>
+            </if>
+            <if test="query.color != null and query.color != ''">
+                AND ISNULL(l.color_lang, a.color) LIKE #{query.colorLike}
+            </if>
+            <if test="query.featured != '' and query.featured != null">
+                AND a.featured = #{query.featured}
+            </if>
+            <if test="query.productId != 0 and query.productId != '' and query.productId != null">
+                AND s.id = #{query.productId}
+            </if>
+            <if test="query.productType != '' and query.productType != null">
+                AND d.code = #{query.productType}
+            </if>
+            <if test="query.parentSeries != 0 and query.parentSeries != '' and query.parentSeries != null">
+                AND s2.id = #{query.parentSeries}
+            </if>
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectProductList" resultMap="BaseResultMap">
+        <![CDATA[
+
+        SELECT
+        id,part_no
+        FROM
+        absen_product
+
+        ]]>
+    </select>
+
+    <select id="findProductListBySeries" resultType="com.jtech.toa.model.dto.products.ProductDto">
+        SELECT p.*,s.sale_price AS suggest_price,s.price AS floor_price
+        FROM absen_product p
+        LEFT JOIN absen_product_price s ON s.product= p.id AND s.area=#{area}
+        WHERE p.series = #{series}
+    </select>
+
+    <select id="findProductListByParams" resultType="com.jtech.toa.model.dto.products.ProductDto">
+        SELECT
+        p.id,p.configuration,p.certification,p.part_no,ISNULL(pl.remark_lang,p.state) state,p.series,p.featured,p.type,p.status,ISNULL(pl.color_lang,p.color) color,
+        p.creater,p.create_time,p.update_time,p.request,
+        apb.width sizeWidth,
+        apb.height sizeHeight
+        FROM absen_product p
+        LEFT JOIN absen_product_lang pl ON (p.id = pl.product AND pl.lang = #{lang})
+        LEFT JOIN absen_product_box apb ON apb.id = p.box
+        LEFT JOIN absen_product_modual apm ON apm.id = apb.modual
+        WHERE NOT EXISTS (SELECT 1 FROM absen_product_sales l WHERE l.product=p.id AND l.area=#{area} AND l.status=0)
+        <if test="series!=null and series!='' and series!=0">
+            AND  p.series=#{series}
+        </if>
+        <if test="cert!=null and cert.size()!=0">
+            AND
+            <foreach collection="cert" item="ct" open="(" close=")" separator=" AND ">
+                charindex(#{ct},p.certification)>0
+            </foreach>
+        </if>
+        <if test="config!=null and config!='' and config!=0">
+            AND p.configuration=#{config}
+        </if>
+        <if test="state!=null and state!=''">
+            AND p.status=#{state}
+        </if>
+    </select>
+
+
+
+
+    <select id="selectProductByBox" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        absen_product
+        WHERE box = #{box}
+    </select>
+
+    <select id="findProductById" resultMap="BaseResultMap">
+        SELECT * FROM absen_product WHERE id=#{id}
+    </select>
+    <select id="selectIdBySeriesIds" resultType="java.lang.Integer">
+        SELECT id FROM absen_product
+        WHERE series IN
+        <foreach collection="seriesIds" item="sid" open="(" close=")" separator=",">
+            #{sid}
+        </foreach>
+    </select>
+
+    <select id="selectProductForOffer" resultType="com.jtech.toa.model.dto.products.ProductDto"
+            parameterType="com.jtech.toa.model.dto.products.ProductDto">
+        SELECT
+        a.id,a.box,a.part_no,a.state, a.featured,a.execution_time,d2.code,
+        a.certification,
+        c.remark AS productConfiguration,
+        s.name AS productSeries,
+        s2.name AS parentSeriesName,
+        d.name AS productType,
+        d2.name AS productStatus,
+        a.color,a.request,b.id salesId,b.status salesStatus
+        FROM absen_product a
+        LEFT JOIN absen_product_sales b ON a.id = b.product
+        LEFT JOIN absen_product_configuration c ON c.id = a.configuration
+        LEFT JOIN absen_product_certification e ON e.code = a.certification
+        JOIN absen_product_series s ON s.id = a.series
+        JOIN absen_product_series s2 ON s.parent = s2.id
+        JOIN absen_basic_dict d ON d.category = 'product_type' AND d.code = a.type
+        JOIN absen_basic_dict d2 ON d2.category = 'product_status' AND d2.code = a.type
+        where a.id = #{pid}
+    </select>
+
+    <select id="selectByIdAndLang" resultMap="BaseResultMap">
+        SELECT ap.id,ap.box,ap.configuration,ap.certification,ap.part_no,ISNULL(apl.remark_lang,ap.state) state,ap.series,ap.featured,ap.update_time,ap.execution_time,
+        ap.type,ap.status,ap.creater,ISNULL(apl.color_lang, ap.color) color
+        FROM absen_product ap
+        LEFT JOIN absen_product_lang apl
+        ON (ap.id = apl.product AND apl.lang = #{lang})
+        WHERE ap.id = #{id}
+    </select>
+
+    <select id="selectSeriesById" resultType="com.jtech.toa.model.dto.products.ProductDto">
+        SELECT a.*, b.name productSeries
+        FROM absen_product a
+        INNER JOIN  absen_product_series b
+        ON a.series = b.id
+        WHERE a.id = #{id}
+    </select>
+    
+    <select id="findWithoutLang" resultMap="BaseResultMap">
+       SELECT * FROM absen_product p
+        WHERE NOT EXISTS (
+          SELECT 1 FROM absen_product_lang l WHERE l.product=p.id AND l.remark_lang IS NOT NULL
+        )
+    </select>
+
+    <select id="selectTop50List" resultType="com.jtech.toa.model.dto.products.AppProduct">
+        SELECT TOP 50 p.id,p.configuration,p.certification,p.part_no,p.series,p.status,p.box,p.state as remark,p.color,
+        l.remark_lang,l.color_lang
+        FROM absen_product p
+        LEFT JOIN absen_product_lang l ON l.product=p.id AND l.lang='en'
+        WHERE p.id>#{lastId}
+    </select>
+
+    <select id="selectProductAllList" resultType="com.jtech.toa.model.dto.products.AppProductDto">
+        SELECT
+            ap.id,
+            ap.box,
+            ISNULL(apcl.remark_lang,apc.remark) AS configuration,
+            ap.certification,
+            ap.part_no partNo,
+            ISNULL(apl.remark_lang, ap.state) state,
+            aps.name series,
+            ap.series seriesId,
+            ap.featured,
+            ap.update_time updateTime,
+            ap.updater,
+            ap.execution_time executionTime,
+            ap.type,
+            ap.status,
+            ISNULL(apl.color_lang, ap.color) color,
+            ap.creater,
+            ap.create_time createTime,
+            ap.request,
+
+            apb.id boxId,
+            apb.scn_no boxScnNo,
+            apb.modual boxModual,
+            apb.modual2 boxModual2,
+            (SELECT scn_no FROM absen_product_modual WHERE id = apb.modual) modualScnNo,
+            (SELECT scn_no FROM absen_product_modual WHERE id = apb.modual2) modualScnNo2,
+            apb.transverse_count boxTransverseCount,
+            apb.portrait_count boxPortraitCount,
+            apb.weight boxWeight,
+            apb.transverse_pix boxTransversePix,
+            apb.portrait_pix boxPortraitPix,
+            apb.height boxHeight,
+            apb.width boxWidth,
+            apb.thickness boxThickness,
+            ISNULL(box_l.type, apb.box_type) boxBoxType,
+            apb.box_type boxBoxType,
+            apb.create_time boxCreateTime,
+            apb.update_time boxUpdateTime,
+
+            app.id paramsId,
+            app.product paramsProduct,
+            ISNULL(app_l.control_lang,app.control) paramsControl,
+            app.calibration paramsCalibration,
+            app.intelligent paramsIntelligent,
+            app.rigging paramsRigging,
+            app.stack paramsStack,
+            app.front paramsFront,
+            ISNULL(app_l.fix_modual_lang,app.fix_modual) paramsFixModual,
+            ISNULL(app_l.fix_psu, app.fix_psu) paramsFixPsu,
+            app.ip_rating paramsIpRating,
+            app.brightness paramsBrightness,
+            app.contrast_ratio paramsContrastRatio,
+            app.gray_scale paramsGrayScale,
+            app.refresh paramsRefresh,
+            app.viewing paramsViewing,
+            app.power_max paramsPowerMax,
+            app.power_avg paramsPowerAvg,
+            app.driving_ic paramsDrivingIc,
+            app.driving_type paramsDrivingType,
+            app.psu paramsPsu,
+            app.psu_power paramsPsuPower,
+            app.psu_count paramsPsuCount,
+            app.standard_carry_lower paramsStandardCarryLower,
+            app.standard_carry_high paramsStandardCarryHigh,
+            app.create_time paramsCreateTime,
+            app.update_time paramsUpdateTime
+        FROM
+            absen_product ap
+        LEFT JOIN absen_product_configuration apc ON apc.id = ap.configuration
+        LEFT JOIN absen_product_configuration_lang apcl ON (apcl.configuration = apc.id AND apcl.lang = #{lang})
+        LEFT JOIN absen_product_series aps ON aps.id = ap.series
+        LEFT JOIN absen_product_lang apl ON (ap.id = apl.product AND apl.lang = #{lang})
+        LEFT JOIN absen_product_box apb ON apb.id = ap.box
+        LEFT JOIN absen_product_box_lang box_l ON (apb.id = box_l.box AND box_l.lang = #{lang})
+        LEFT JOIN absen_product_params app ON app.product = ap.id
+        LEFT JOIN absen_product_params_lang app_l ON (app_l.params = app.id AND app_l.lang = #{lang})
+          WHERE ap.id > #{lastId}
+    </select>
+
+    <select id="findAllWithoutProductLang" resultMap="BaseResultMap">
+        SELECT * FROM absen_product ap
+        WHERE NOT EXISTS (
+              SELECT 1 FROM absen_product_lang apl WHERE ap.id = apl.product
+                    and apl.lang = 'en' AND apl.color_lang IS NOT NULL
+        )
+    </select>
+    <select id="selectProductBySeries" resultMap="BaseResultMap">
+        SELECT ap.id,ap.box,ap.configuration,ap.certification,ap.part_no,ISNULL(apl.remark_lang,ap.state) state,ap.series,ap.featured,ap.update_time,ap.execution_time,
+        ap.type,ap.status,ap.creater,ISNULL(apl.color_lang, ap.color) color
+        FROM absen_product ap
+        INNER JOIN absen_prices_details apd ON ap.id = apd.panel
+        INNER JOIN absen_price_assign apa ON apd.systems = apa.systems
+        LEFT JOIN absen_product_lang apl
+        ON (ap.id = apl.product AND apl.lang = #{lang})
+        WHERE ap.series = #{series} AND apa.area = #{area}
+        <if test="panelIdList != null and panelIdList.size > 0">
+            AND ap.id NOT IN
+            <foreach item="idItem" collection="panelIdList" open="("  separator=","  close=")">
+                #{idItem}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectByPanelsAndLang" resultMap="BaseResultMap">
+         SELECT ap.id,ap.box,ap.configuration,ap.certification,ap.part_no,ISNULL(apl.remark_lang,ap.state) state,ap.series,ap.featured,ap.update_time,ap.execution_time,
+        ap.type,ap.status,ap.creater,ISNULL(apl.color_lang, ap.color) color
+        FROM absen_product ap
+        LEFT JOIN absen_product_lang apl
+        ON (ap.id = apl.product AND apl.lang = #{lang})
+        WHERE ap.id in (
+        <foreach collection="panelsParent" index="index" separator="," item="item">
+            #{item.panel}
+
+        </foreach>
+         )
+    </select>
+
+    <select id="findBoxAndParamsById" resultType="com.jtech.toa.model.dto.products.BoxParamsDto">
+        SELECT
+            b.width AS boxWidth,
+            b.height AS boxHeight,
+            b.thickness AS boxThickness,
+            b.weight AS boxWeight,
+            b.transverse_pix AS boxTransversePix,
+            b.portrait_pix AS boxPortraitPix,
+            b.transverse_count AS boxTransverseCount,
+            b.portrait_count AS boxPortraitCount,
+            ISNULL(l.type, b.box_type) AS boxType,
+            p.power_max AS powerMax,
+            p.power_avg AS powerAvg
+        FROM
+            absen_product a
+        INNER JOIN absen_product_box b ON a.box = b.id
+        INNER JOIN absen_product_params p ON a.id = p.product
+        LEFT JOIN absen_product_box_lang l ON (b.id = l.box AND l.lang = #{lang})
+        WHERE
+            a.id = #{id}
+    </select>
+</mapper>

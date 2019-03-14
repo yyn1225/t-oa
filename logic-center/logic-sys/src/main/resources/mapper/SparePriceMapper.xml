@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SparePriceMapper">
+    <select id="selectAreaPrice" resultType="com.jtech.toa.model.dto.products.SparePriceDto">
+        SELECT
+        d.name,d.id areaId,p.price,p.id sparePriceId,p.sale_price,p.area,p.unit
+        FROM
+        absen_org_department d
+        LEFT JOIN absen_product_spare_price p ON (d.id = p.area AND p.spare = #{spareId})
+        where level = 2 AND status = 1
+    </select>
+
+    <select id="findTop100List" resultType="com.jtech.toa.model.dto.prices.AppSparePrice">
+        SELECT TOP 100 * FROM absen_product_spare_price
+        WHERE area=#{area} AND id>#{lastId} ORDER BY id
+    </select>
+
+    <select id="findAllSpareList" resultType="com.jtech.toa.model.dto.prices.AppSparePrice">
+        SELECT
+            apsp.id,
+            apsp.spare,
+            apsp.price,
+            apsp.unit,
+            apsp.area,
+            apsp.sale_price salePrice,
+            apsp.create_time createTime,
+            apsp.update_time modifyTime
+        FROM
+            absen_product_spare_price apsp
+        WHERE apsp.area = #{area} AND apsp.id > #{lastId} ORDER BY apsp.id
+    </select>
+</mapper>

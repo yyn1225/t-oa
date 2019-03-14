@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.OfferPanelsMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.OfferPanels">
+		<id column="id" property="id" />
+		<result column="offer" property="offer" />
+		<result column="panel" property="panel" />
+		<result column="wcount" property="wcount" />
+		<result column="lcount" property="lcount" />
+		<result column="horizontal" property="horizontal" />
+		<result column="longitudinal" property="longitudinal" />
+		<result column="price" property="price" />
+		<result column="orders" property="orders" />
+		<result column="total_price" property="totalPrice" />
+		<result column="discount" property="discount" />
+		<result column="sugg_price" property="suggPrice" />
+		<result column="cost_price" property="costPrice" />
+	</resultMap>
+	<select id="selectListByOffer" resultType="com.jtech.toa.model.dto.offer.OfferPanelsDto">
+		SELECT aop.id,aop.offer,aop.panel,aop.wcount,aop.lcount, aop.horizontal,aop.longitudinal,aop.price,aop.orders,
+		aop.total_price totalPrice,aop.discount,aop.sugg_price suggPrice,aop.cost_price costPrice,ap.part_no partNo,
+		apc.name certificateName,ISNULL(apl.color_lang, ap.color) color, aps.name AS seriesName
+		FROM absen_offer_panels aop
+		INNER JOIN absen_product ap
+		ON aop.panel = ap.id
+		INNER JOIN absen_product_series aps
+		ON aps.id = aop.series
+		LEFT JOIN absen_product_certification apc
+        ON ap.certification = apc.code
+        LEFT JOIN absen_product_lang apl
+        ON (ap.id = apl.product AND apl.lang = #{lang})
+		WHERE aop.offer = #{offerId}
+	</select>
+	<select id="selectListByOfferList" resultType="com.jtech.toa.model.dto.offer.OfferPanelsDto">
+		SELECT aop.*, ISNULL(apl.remark_lang, ap.state) AS remark
+		FROM absen_offer_panels aop
+		INNER JOIN absen_offer ao
+		ON aop.offer = ao.id
+		LEFT JOIN absen_product ap
+		ON ap.id = aop.panel
+		LEFT JOIN absen_product_lang apl
+		ON (apl.product = ap.id AND apl.lang = #{lang})
+		WHERE ao.delete_flag = 0
+		AND aop.offer
+		IN
+		<foreach collection="offerIdList" item="offerId" separator="," close=")" open="(">
+			#{offerId}
+		</foreach>
+	</select>
+	<select id="selectApiListByOfferData" resultType="com.jtech.toa.model.dto.offer.AppOfferProductDto">
+		SELECT
+		aop.id,
+		aop.offer,
+		aop.panel,
+		aop.wcount,
+		aop.lcount,
+		aop.horizontal,
+		aop.longitudinal,
+		aop.price,
+		aop.orders,
+		aop.total_price totalPrice,
+		aop.discount,
+		aop.sugg_price suggPrice,
+		aop.cost_price costPrice,
+		aop.quantity,
+		aop.series,
+		aop.standard_price standardPrice,
+		aop.standard_discount standardDiscount,
+		aop.free_price freePrice,
+		aop.spare_discount spareDiscount,
+		ap.configuration,
+		ap.certification,
+		ap.part_no partNo,
+		ISNULL(apl.remark_lang, ap.state) state,
+		ap.featured,
+		ISNULL(apl.color_lang, ap.color) color
+		FROM
+		absen_offer_panels aop
+		LEFT JOIN absen_product ap ON ap.id = aop.panel
+		LEFT JOIN absen_product_lang apl ON (ap.id = apl.product AND apl.lang = #{lang})
+		WHERE aop.offer IN
+		<foreach collection="offerIdList" item="offerId" separator="," close=")" open="(">
+			#{offerId}
+		</foreach>
+	</select>
+
+	<select id="selectDtoList" resultType="com.jtech.toa.model.dto.offer.OfferPanelsDto">
+		select * from absen_offer_panels aop where aop.offer = #{offerId} and aop.split_screen_parent = #{id}
+	</select>
+</mapper>

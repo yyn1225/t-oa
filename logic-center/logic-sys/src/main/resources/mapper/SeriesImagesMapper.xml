@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the proerty of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SeriesImagesMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.product.SeriesImages">
+		<id column="id" property="id" />
+		<result column="series" property="series" />
+		<result column="defaults" property="defaults" />
+		<result column="url_thum" property="urlThum" />
+		<result column="sorts" property="sorts" />
+		<result column="uploader" property="uploader" />
+		<result column="upload_time" property="uploadTime" />
+		<result column="url_original" property="urlOriginal" />
+		<result column="attachment" property="attachment" />
+		<result column="update_time" property="updateTime"/>
+		<result column="delete_flag" property="deleteFlag"/>
+	</resultMap>
+	<select id="selectBySeriesId" resultMap="BaseResultMap">
+		SELECT * FROM absen_series_images WHERE series = #{seriesId} AND delete_flag=0
+	</select>
+	<delete id="deleteByImageId">
+		UPDATE absen_series_images SET delete_flag=1,update_time=#{updateTime} WHERE id = #{image}
+	</delete>
+</mapper>

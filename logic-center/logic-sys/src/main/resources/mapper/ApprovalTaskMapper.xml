@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ApprovalTaskMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.approval.ApprovalTask">
+		<id column="id" property="id" />
+		<result column="opt_user" property="optUser" />
+		<result column="opt_time" property="optTime" />
+		<result column="opt_status" property="optStatus" />
+		<result column="opt_result" property="optResult" />
+		<result column="orders" property="orders" />
+		<result column="opinion" property="opinion" />
+		<result column="creater" property="creater" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+
+	<select id="selectApprovalList" resultType="com.jtech.toa.model.dto.sys.ApprovalTaskDto">
+		SELECT TOP 10 ao.id,aat.opt_status status,aat.opt_result result,aat.id approvalId, aou.name creater, ao.customer_name customer, ao.cost totalPrice,
+		aat.opinion,aat.create_time createTime
+		FROM absen_approval_task aat
+		INNER JOIN absen_offer ao
+		ON aat.orders = ao.id
+		INNER JOIN absen_org_user aou
+		ON aat.creater = aou.id
+		WHERE aat.opt_user = #{userId}
+		<if test="lastId != null and lastId != 0">
+		<![CDATA[
+		    AND aat.id > #{lastId}
+		]]>
+		</if>
+		<if test="status != null and status != ''">
+			AND aat.opt_status = #{status}
+		</if>
+		ORDER BY aat.id ASC
+	</select>
+
+	<select id="selectMyApproval" resultType="com.jtech.toa.model.dto.sys.ApprovalTaskDto">
+		SELECT TOP 10 ao.id, aat.id approvalId, aou.name creater, ao.customer_name customer, ao.cost totalPrice, ao.status, aat.opinion
+		FROM absen_offer ao
+		INNER JOIN absen_org_user aou
+		ON ao.creater = aou.id
+		LEFT JOIN absen_approval_task aat
+		ON aat.orders = ao.id
+		WHERE ao.creater = #{userId}
+		<if test="lastId != null and lastId != 0">
+		<![CDATA[
+		AND ao.id < #{lastId}
+		]]>
+		</if>
+		<if test="status != null and status != ''">
+			AND ao.status = #{status}
+		</if>
+		ORDER BY aat.id DESC
+	</select>
+</mapper>

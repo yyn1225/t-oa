@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.SeriesMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.product.Series">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="line" property="line"/>
+        <result column="status" property="status"/>
+        <result column="creater" property="creater"/>
+        <result column="createTime" property="createTime"/>
+        <result column="image" property="image"/>
+        <result column="parent" property="parent"/>
+        <result column="remark" property="remark"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <resultMap id="ImageResult" type="com.jtech.toa.entity.product.SeriesImages">
+        <id column="id" property="id"/>
+        <result column="default" property="defaults"/>
+        <result column="url_thum" property="urlThum"/>
+        <result column="sort" property="sort"/>
+        <result column="uploader" property="uploader"/>
+        <result column="upload_time" property="uploadTime"/>
+        <result column="url_original" property="urlOriginal"/>
+        <result column="attachment" property="attachment"/>
+        <result column="series" property="series"/>
+    </resultMap>
+
+    <select id="findSeriesList" resultMap="BaseResultMap">
+       SELECT
+            s.id,s.name,s.line,s.status,s.creater,s.create_time createTime,s.featured,
+            s.parent,s.remark,s.type,s.update_time, i.url_thum AS image
+        FROM absen_product_series s
+        LEFT JOIN absen_series_images i ON i.series=s.id AND i.delete_flag=0
+        WHERE status=1
+        <if test="line != null and line !=0">
+            AND line = #{line}
+        </if>
+        ORDER BY s.name
+    </select>
+
+    <select id="findSeriesListByLineAndArea" resultMap="BaseResultMap">
+        SELECT * FROM (
+        SELECT DISTINCT
+	        s.id,s.name,s.line,s.status,s.creater,s.create_time createTime,s.featured,
+            s.parent,s.remark,s.type,s.update_time
+        FROM
+	        absen_product_series s
+        INNER JOIN absen_product p ON s.id = p.series
+        INNER JOIN absen_prices_details d ON p.id = d.panel
+        INNER JOIN absen_price_assign a ON a.systems = d.systems
+        WHERE
+	        a.area = #{area}
+	    AND
+	        s.status = 1
+	    AND
+	        s.line = #{line}
+	    UNION
+	    SELECT DISTINCT
+            s2.id,
+            s2.name,
+            s2.line,
+            s2.status,
+            s2.creater,
+            s2.create_time createTime,
+            s2.featured,
+            s2.parent,
+            s2.remark,
+            s2.type,
+            s2.update_time
+        FROM
+            absen_product_series s
+        INNER JOIN absen_product p ON s.id = p.series
+        INNER JOIN absen_product_series s2 ON s2.id = s.parent
+        INNER JOIN absen_prices_details d ON p.id = d.panel
+        INNER JOIN absen_price_assign a ON a.systems = d.systems
+        WHERE
+            a.area = #{area}
+        AND s.status = 1
+        AND s.line = #{line}) st
+        ORDER BY st.name
+    </select>
+    <select id="findSeriesListByLineAll" resultMap="BaseResultMap">
+        SELECT * FROM (
+        SELECT DISTINCT
+	        s.id,s.name,s.line,s.status,s.creater,s.create_time createTime,s.featured,
+            s.parent,s.remark,s.type,s.update_time
+        FROM
+	        absen_product_series s
+        INNER JOIN absen_product p ON s.id = p.series
+        INNER JOIN absen_prices_details d ON p.id = d.panel
+        INNER JOIN absen_price_assign a ON a.systems = d.systems
+        WHERE
+	        s.status = 1
+	    AND
+	        s.line = #{line}
+	    UNION
+	    SELECT DISTINCT
+            s2.id,
+            s2.name,
+            s2.line,
+            s2.status,
+            s2.creater,
+            s2.create_time createTime,
+            s2.featured,
+            s2.parent,
+            s2.remark,
+            s2.type,
+            s2.update_time
+        FROM
+            absen_product_series s
+        INNER JOIN absen_product p ON s.id = p.series
+        INNER JOIN absen_product_series s2 ON s2.id = s.parent
+        INNER JOIN absen_prices_details d ON p.id = d.panel
+        INNER JOIN absen_price_assign a ON a.systems = d.systems
+        WHERE s.status = 1
+        AND s.line = #{line}) st
+        ORDER BY st.name
+    </select>
+
+    <select id="findSeriesListByLine" resultMap="BaseResultMap">
+        SELECT
+            s.id,s.name,s.line,s.status,s.creater,s.create_time,
+            s.parent,s.remark,s.type,s.update_time, i.url_thum AS image
+        FROM absen_product_series s
+        LEFT JOIN absen_series_images i ON i.series=s.id AND s.parent=0 AND i.delete_flag=0
+        WHERE status=1 AND line=#{line}
+        ORDER BY s.name DESC
+    </select>
+    <select id="selectByType" resultType="com.jtech.toa.model.dto.products.SeriesAppDto">
+        SELECT id,name,line,creater,create_time,image,parent,remark,type FROM
+        absen_product_series WHERE status = 1 AND type = #{type}
+    </select>
+    <select id="findSeriesById" resultMap="BaseResultMap">
+        SELECT * FROM  absen_product_series WHERE id=#{series}
+    </select>
+
+    <select id="findAllSeries" resultMap="BaseResultMap" parameterType="com.jtech.toa.model.query.SeriesQuery">
+        SELECT *,
+        ISNULL(
+        (
+        SELECT
+        TOP 1 1
+        FROM
+        absen_product
+        WHERE
+        series = tmp.id
+        ), 0) enableProduct
+        FROM (SELECT
+        ISNULL( l.name_lang,s.name) AS name,
+        s.id,
+        s.status,
+        s.parent,
+        s.remark,
+        s.type,
+        s.image
+        FROM
+        absen_product_series s
+        LEFT JOIN absen_product_series_lang l
+        ON l.series = s.id
+        AND l.lang = #{query.lang}) tmp
+        WHERE tmp.status = 1
+        <if test="query.name != null and query.name != ''">
+            AND tmp.name LIKE #{query.nameLike}
+        </if>
+    </select>
+    <select id="selectAllByParentNames" resultType="Integer">
+        SELECT aps.id FROM absen_product_series aps
+        WHERE aps.name
+        IN
+        <foreach collection="names" item="name" separator="," close=")" open="(">
+           #{name}
+        </foreach>
+    </select>
+    <select id="selectIdByParentIds" resultType="Integer">
+        SELECT aps.id FROM absen_product_series aps
+        WHERE aps.parent
+        IN
+        <foreach collection="pids" item="id" separator="," close=")" open="(">
+            #{id}
+        </foreach>
+    </select>
+    <select id="selectSeriesListByPage" resultType="com.jtech.toa.model.dto.products.SeriesDto">
+        SELECT aps.id,aps.[name] AS text, aps.remark,aps.status, apsp.[name] AS pName FROM absen_product_series aps
+        LEFT JOIN absen_product_series apsp ON  aps.parent = apsp.id
+        WHERE 1 = 1
+        <if test="query!=null">
+            <if test="query.name!=null and query.name!=''">
+                AND aps.[name] LIKE #{query.nameLike}
+            </if>
+            <if test="query.flag">
+                AND aps.parent != 0
+            </if>
+            <if test="query.allName!=null and query.allName!=''">
+                AND (aps.[name] LIKE #{query.allNameLike} OR apsp.[name] LIKE #{query.allNameLike})
+            </if>
+        </if>
+    </select>
+
+    <select id="selectSeriesImgListByPage" resultType="com.jtech.toa.model.dto.products.SeriesDto">
+        SELECT aps.id,aps.[name] AS text, aps.remark,aps.status, apsp.[name] AS pName FROM absen_product_series aps
+        LEFT JOIN absen_product_series apsp ON  aps.parent = apsp.id
+        WHERE aps.status = 1
+        <if test="query!=null">
+            <if test="query.name!=null and query.name!=''">
+                AND aps.[name] LIKE #{query.nameLike}
+            </if>
+        </if>
+    </select>
+
+    <select id="findParentSeries" resultType="com.jtech.toa.model.dto.products.SeriesDto">
+        SELECT s.id,s.name AS [text] ,s.line,s.status,s.creater,
+            s.create_time,i.url_thum AS image,s.parent,s.remark,
+            s.type,'' AS pname
+            FROM dbo.absen_product_series AS s
+            LEFT JOIN absen_series_images i ON i.series=s.id AND delete_flag=0
+            WHERE s.parent=0 OR s.parent IS NULL
+    </select>
+
+    <select id="getByProductId" resultMap="BaseResultMap">
+        select aps.* from absen_product_series aps left join
+        absen_product ap on aps.id = ap.series
+        where ap.id = #{productId}
+    </select>
+</mapper>

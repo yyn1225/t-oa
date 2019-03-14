@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.offer.TransportPackageMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.offer.TransportPackage">
+		<id column="id" property="id" />
+		<result column="transfer" property="transfer" />
+		<result column="offer" property="offer" />
+		<result column="packages" property="packages" />
+		<result column="price" property="price" />
+	</resultMap>
+
+</mapper>

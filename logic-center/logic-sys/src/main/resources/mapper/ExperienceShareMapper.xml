@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ExperienceShareMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.jtech.toa.entity.experience.ExperienceShare">
+		<id column="id" property="id" />
+		<result column="series_id" property="seriesId" />
+		<result column="title" property="title" />
+		<result column="content" property="content" />
+		<result column="status" property="status" />
+		<result column="create_user" property="createUser" />
+		<result column="create_time" property="createTime" />
+		<result column="modify_user" property="modifyUser" />
+		<result column="modify_time" property="modifyTime" />
+	</resultMap>
+
+	<select id="selectExperienceList" resultType="com.jtech.toa.model.dto.experience.ExperienceDto">
+		SELECT
+		  share.id	as	id		,
+			share.series_id	as	seriesId		,
+			series.name as productName ,
+			share.title	as	title		,
+			share.content	as	content		,
+			share.status	as	status		,
+			share.create_user	as	createUser		,
+		  lang.name_lang as createUserName,
+			share.create_time	as	createTime		,
+			share.modify_user	as	modifyUser		,
+			share.modify_time	as	modifyTime
+		FROM absen_experience_share  share
+		LEFT JOIN  absen_product_series series
+		ON share.series_id = series.id
+		LEFT JOIN absen_org_user us
+		ON share.create_user = us.id
+		LEFT JOIN absen_org_user_lang lang ON us.id = lang.[user]
+		WHERE 1 = 1
+		<if test="query.productName != null and  query.productName != ''">
+			and series.name like '%'+#{query.productName}+'%'
+		</if>
+		<if test="query.title != null and  query.title != ''">
+			and share.title like '%'+#{query.title}+'%'
+		</if>
+		<if test="query.createUserName != null and  query.createUserName != ''">
+			and us.name like '%'+#{query.createUserName}+'%'
+		</if>
+		<if test="query.lang != null and  query.lang != ''">
+			and lang.LANGUAGE = #{query.lang}
+		</if>
+		ORDER BY share.create_time desc
+	</select>
+	<select id="selectDtoById" resultType="com.jtech.toa.model.dto.experience.ExperienceDto">
+		SELECT
+		  share.id	as	id		,
+			share.series_id	as	seriesId		,
+			series.name as productName ,
+			series.line as seriesLine ,
+			share.title	as	title		,
+			share.content	as	content		,
+			share.status	as	status		,
+			share.create_user	as	createUser		,
+		  ISNULL(aoul.name_lang,us.name ) AS userName,
+			share.create_time	as	createTime		,
+			share.modify_user	as	modifyUser		,
+			share.modify_time	as	modifyTime
+		FROM absen_experience_share  share
+		LEFT JOIN  absen_product_series series
+		ON share.series_id = series.id
+		LEFT JOIN absen_org_user us
+		ON share.create_user = us.id
+		LEFT JOIN absen_org_user_lang aoul ON  us.id = aoul.[user]
+		WHERE share.id = #{id} and aoul.language = #{lang}
+	</select>
+
+	<select id="getShareListForApp" resultType="com.jtech.toa.model.app.AppShare">
+		select top 20 aes.id as id,aes.title as title,CONVERT(VARCHAR(24),aes.create_time,120) as createTime
+		from absen_experience_share as aes left join absen_product_series as aps on aes.series_id = aps.id
+		left join absen_org_user as aou on aes.create_user = aou.id
+		where aes.status = 1
+		<if test="type != null and type == 1">
+			and aes.create_user = #{currentUserId}
+		</if>
+		<if test="type != null and type == 2">
+			and aes.create_user <![CDATA[ <> ]]> #{currentUserId}
+		</if>
+		<if test="shareUserName != null and shareUserName != ''">
+			and aou.name like '%'+#{shareUserName}+'%'
+		</if>
+		<if test="productName != null and productName != ''">
+			and aps.name like '%'+#{productName}+'%'
+		</if>
+		<if test="title != null and title != ''">
+			and aes.title like '%'+#{title}+'%'
+		</if>
+		<if test="id != null and id != 0">
+			and aes.id &lt; #{id}
+		</if>
+		order by aes.id DESC
+	</select>
+
+	<select id="getByIdForApp" resultType="com.jtech.toa.model.app.AppShare">
+			select aes.id as id,aes.series_id as productId,aps.name as productName,
+		aes.title as title,aes.content as content,aes.create_user as createUserId,
+		ISNULL(aoul.name_lang,aou.name ) AS createUserName,
+		CONVERT(VARCHAR(24),aes.create_time,120) as createTime
+		from absen_experience_share as aes left join absen_product_series as aps
+		on aes.series_id = aps.id
+		left join absen_org_user as aou on aes.create_user = aou.id
+		left join absen_org_user_lang as aoul on aou.id = aoul.[user]
+		where aes.id = #{id} AND aoul.language = #{lang}
+	</select>
+</mapper>

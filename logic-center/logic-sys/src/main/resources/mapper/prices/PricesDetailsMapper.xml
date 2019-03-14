@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2015-2017, AnHui Mobiao technology co. LTD Inc. All Rights Reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.prices.PricesDetailsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.prices.PricesDetails">
+        <id column="id" property="id"/>
+        <result column="panel" property="panel"/>
+        <result column="price" property="price"/>
+        <result column="modual" property="modual"/>
+        <result column="systems" property="systems"/>
+    </resultMap>
+
+    <select id="getByPanelAndArea" resultMap="BaseResultMap">
+		SELECT d.* FROM absen_prices_details d
+		JOIN absen_price_system s ON s.id=d.systems AND #{date}>s.start_time AND s.end_time>#{date}
+		JOIN absen_price_assign a ON a.systems=d.systems AND a.area=#{area}
+		WHERE d.panel=#{panel}
+	</select>
+
+    <select id="getListBySystemsId" resultType="com.jtech.toa.model.dto.prices.PricesDetailDto">
+		SELECT d.*, p.part_no AS scn_no ,p.state as product_state FROM absen_prices_details d
+		LEFT JOIN absen_product p ON p.id=d.panel
+		WHERE d.systems=#{systemId}
+	</select>
+
+    <select id="findAreaPriceByPage" resultType="com.jtech.toa.model.dto.prices.AreaPricesDetailDto">
+    SELECT
+	    apd.id AS id,
+	    apse.name AS seriesName,
+	    ap.part_no AS partNo,
+	    apd.price AS price,
+	    apd.unit AS unit,
+	    ap.state AS remark,
+	    apa.area AS area,
+	    aps.create_time AS createTime,
+	    aps.name AS systemName
+    FROM
+	    absen_price_system AS aps,
+	    absen_prices_details AS apd,
+	    absen_product AS ap,
+	    absen_product_series AS apse,
+	    absen_price_assign AS apa
+        WHERE
+	        aps.id = apd.systems
+        AND ap.id = apd.panel
+        AND ap.series = apse.id
+        AND aps.id = apa.systems
+		AND apse.status = 1
+        <if test="query != null">
+			<if test="query.area != null">
+				AND apa.area = #{query.area}
+			</if>
+			<if test="query.seriesList != null and query.seriesList.size() != 0">
+				AND ap.series IN
+				<foreach collection="query.seriesList" item="idItem" separator="," open="(" close=")">
+					#{idItem}
+				</foreach>
+			</if>
+			<if test="query.partNo != null and query.partNo != ''">
+				AND ap.part_no LIKE #{query.partNoLike}
+			</if>
+		</if>
+	</select>
+
+	<select id="getListBySparePriceSystemsId" resultType="com.jtech.toa.model.dto.products.SparePriceDetailsDto">
+		SELECT d.*,s.material  FROM absen_spare_price_details d left JOIN absen_product_spare s on d.spare = s.id
+		WHERE d.systems=#{systemId}
+	</select>
+</mapper>

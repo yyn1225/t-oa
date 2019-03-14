@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The Hefei JingTong RDC(Research and Development Centre) Group.
+  ~ __________________
+  ~
+  ~    Copyright 2015-2017
+  ~    All Rights Reserved.
+  ~
+  ~    NOTICE:  All information contained herein is, and remains
+  ~    the property of JingTong Company and its suppliers,
+  ~    if any.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.ResourceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jtech.toa.entity.system.Resource">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="parent" property="parent"/>
+        <result column="type" property="type"/>
+        <result column="creater" property="creater"/>
+        <result column="create_time" property="createTime"/>
+        <result column="icon" property="icon"/>
+        <result column="url" property="url"/>
+    </resultMap>
+    <select id="selectByUserId" resultMap="BaseResultMap">
+		SELECT aor.id, code,ISNULL(aorl.name_lang,aor.name) AS name,parent,type,icon,url
+		FROM absen_org_resource aor
+		LEFT JOIN absen_org_resource_lang aorl ON aorl.resource = aor.id
+		AND aorl.[language] = #{lang}
+		WHERE 1=1
+		<if test="userId!=0" >
+		AND (EXISTS (SELECT 1 FROM absen_org_role_resource orr
+LEFT JOIN absen_org_role_user aoru ON aoru.role = orr.role
+WHERE aoru.users = #{userId} AND orr.resource = aor.id) OR
+EXISTS (SELECT 1 FROM absen_org_user_resource aour WHERE aour.users = #{userId}
+AND aour.resource = aor.id) )</if>
+	</select>
+
+    <select id="selectByCode" resultMap="BaseResultMap">
+        SELECT top 1 id,name,code,parent,creater,icon,url,create_time
+        FROM absen_org_resource
+        WHERE code= #{code}
+    </select>
+
+    <!--<select id="selectByCodeAndIdNotEq" resultMap="BaseResultMap">-->
+        <!--SELECT top 1 id,name,code,parent,creater,icon,url,create_time-->
+        <!--FROM absen_org_resource-->
+        <!--WHERE code= #{code} AND id != #{id}-->
+    <!--</select>-->
+
+    <select id="selectResourceListByPage" resultType="com.jtech.toa.model.dto.sys.ResouceDto">
+        SELECT
+        r1.id,ISNULL(l.name_lang, r1.name) [name],r1.code,r1.parent,r1.creater,r1.icon,r1.url,r1.create_time,
+        r2.parentName
+        FROM
+        absen_org_resource r1
+        LEFT JOIN
+        (SELECT r.*,ISNULL(l2.name_lang, r.name) parentName FROM absen_org_resource r
+        LEFT JOIN absen_org_resource_lang l2 ON r.id = l2.resource AND l2.language = #{query.lang}) r2
+        ON r1.parent =r2.id
+        LEFT JOIN
+        absen_org_resource_lang l ON (l.resource = r1.id AND l.language = #{query.lang})
+        WHERE 1=1
+        <if test="query!=null">
+            <if test="query.code !=null and query.code !=''">
+                AND r1.code LIKE #{query.customerCodeLike}
+            </if>
+            <if test="query.name !=null and query.name !=''">
+                AND r1.name LIKE #{query.customerNameLike}
+            </if>
+        </if>
+    </select>
+
+    <select id="selectResourceList" resultType="com.jtech.toa.entity.system.Resource">
+        SELECT
+        org.id,ISNULL(lang.name_lang, org.name) as [name]
+        FROM
+        absen_org_resource org
+				LEFT JOIN absen_org_resource_lang lang
+				on org.id = lang.resource
+				where lang.language = #{lang}
+    </select>
+    <select id="selectResourceByParent" resultMap="BaseResultMap">
+        SELECT
+        id,[name]
+        FROM
+        absen_org_resource where parent = #{resource}
+    </select>
+
+    <delete id="deleteResource">
+        DELETE FROM absen_org_resource WHERE id = #{id}
+    </delete>
+
+
+</mapper>

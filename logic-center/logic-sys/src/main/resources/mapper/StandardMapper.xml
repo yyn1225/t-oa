@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.StandardMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResults" type="com.jtech.toa.entity.product.Standard">
+        <id column="id" property="id"/>
+        <result column="product" property="product"/>
+        <result column="spare" property="spare"/>
+        <result column="standard" property="standard"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <resultMap id="standardDtoMapper" type="com.jtech.toa.model.dto.products.StandardDto">
+        <id column="id" property="id"/>
+        <result column="brand" property="brand"/>
+        <result column="model" property="model"/>
+        <result column="excute_time" property="executeTime"/>
+        <result column="material" property="material"/>
+        <result column="description" property="description"/>
+        <result column="remark" property="remark"/>
+        <result column="unit" property="unit"/>
+        <result column="sid" property="sid"/>
+        <result column="num" property="num"/>
+        <result column="styType" property="styType"/>
+        <result column="formula" property="formula"/>
+        <result column="standard" property="standard"/>
+    </resultMap>
+
+    <!--<select id="selectStandardListByPage" resultMap="standardDtoMapper" parameterType="com.jtech.toa.entity.product.Spare">-->
+    <!--SELECT-->
+    <!--id,brand,model,excute_time,material,description,remark,unit,[type]-->
+    <!--FROM-->
+    <!--absen_product_spare-->
+    <!--where id in (SELECT-->
+    <!--spare-->
+    <!--FROM-->
+    <!--absen_product_standard-->
+    <!--WHERE 1=1-->
+    <!--<if test="query!=null">-->
+    <!--<if test="query.type !=null and query.type !=''">-->
+    <!--AND [type] = #{query.type}-->
+    <!--</if>-->
+    <!--<if test="query.product !=null and query.product !=0">-->
+    <!--AND product = #{query.product}-->
+    <!--</if>-->
+    <!--</if>)-->
+    <!--</select>-->
+
+    <delete id="deleteStandard">
+        DELETE FROM absen_product_standard WHERE product = #{pid} and spare = #{sid} and [type] =#{typeNum}
+    </delete>
+
+    <!--<update id="updateStandard" parameterType="com.jtech.toa.model.dto.StandardDto" >-->
+    <!--UPDATE absen_product_standard SET-->
+    <!--standard=#{standard}-->
+    <!--where id =#{id}-->
+    <!--</update>-->
+
+    <select id="selectStandardListByPage" resultMap="standardDtoMapper"
+            parameterType="com.jtech.toa.model.dto.products.StandardDto">
+        SELECT
+        sp.id,ISNULL(spl.brand_lang, sp.brand) brand,ISNULL(spl.model_lang, sp.model) model,sp.excute_time,sp.material,
+        ISNULL(spl.description_lang,sp.description) description,ISNULL(spl.remark_lang,sp.remark) remark,
+        sp.unit,ISNULL(spl.type_lang,sp.type) [type],st.id sid,st.counts_two as num,st.type as styType,st.spel_two as formula
+        FROM
+        absen_product_standard st
+        LEFT JOIN absen_product_spare sp
+        ON st.spare = sp.id
+        LEFT JOIN absen_product_spare_lang spl
+        ON (sp.id = spl.spare AND spl.lang = #{query.lang})
+        WHERE 1=1
+        <if test="query!=null">
+            <if test="query.type !=null and query.type !=0">
+                AND st.type LIKE #{query.type}
+            </if>
+            <if test="query.product !=null and query.product !=0">
+                AND st.product = #{query.product}
+            </if>
+        </if>
+    </select>
+
+    <select id="findTop100List" resultMap="BaseResults">
+        SELECT TOP 100 * FROM absen_product_standard WHERE id>#{lastId} ORDER BY id
+    </select>
+    <select id="findAllStandardList" resultType="com.jtech.toa.model.dto.products.AppSpareProduct">
+        SELECT
+            aps.id,
+            aps.product,
+            aps.spare,
+            aps.standard,
+            aps.type,
+            aps.counts_two countsTwo,
+            aps.counts_three countsThree,
+            aps.counts_four countsFour,
+            aps.counts_five countsFive,
+            aps.spel_two spelTwo,
+            aps.spel_three spelThree,
+            aps.spel_four spelFour,
+            aps.spel_five spelFive,
+            aps.cal_type_two calTypeTwo,
+            aps.cal_type_three calTypeThree,
+            aps.cal_type_four calTypeFour,
+            aps.cal_type_five calTypeFive
+        FROM
+            absen_product_standard aps
+        WHERE aps.id>#{lastId} ORDER BY aps.id
+    </select>
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jtech.toa.dao.LanguageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResults" type="com.jtech.toa.entity.system.Language">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="code" property="code" />
+        <result column="icon" property="icon" />
+    </resultMap>
+
+    <select id="selectLanguageList" resultMap="BaseResults">
+        SELECT
+        id,[name],code,icon,[order]
+        FROM
+        absen_sys_language
+        WHERE
+        status = 1
+    </select>
+    <select id="selectByCode" resultMap="BaseResults">
+        SELECT TOP 1
+        id,[name],code,icon FROM absen_sys_language WHERE code = #{lang} AND status = 1
+    </select>
+</mapper>
