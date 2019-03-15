@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 /**
  * <p> Api应用，采用 War形式启动，开发执行运行 </p>
  *
- * @author sog
+ * @author dongdong
  * @version 1.0
  * @since JDK 1.7
  */
