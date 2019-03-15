@@ -509,7 +509,7 @@
 
             if (_packageIds && _packageIds.length > 0) {
                 dt.addAjaxParam('folderId', _packageIds);
-            }else{
+            }else {
                 dt.addAjaxParam('folderId', '');
             }
             if (seriesIds && seriesIds.length > 0) {
