@@ -222,7 +222,7 @@
         color: #2ea8e5;
         background: #fff;
     }
-
+    th, td { white-space: nowrap; }
 </style>
 
 <link rel="stylesheet" href="../../static/js/plugin/ztree/css/metroStyle/metroStyle.css"/>

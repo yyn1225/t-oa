@@ -79,6 +79,8 @@ var Datatables = function () {
                     autoWidth: false,
                     processing: false,
                     serverSide: true,
+                    scrollX:true,//水平滚动
+                    responsive: false,//关闭响应式效果,否则以上设置无效
 
                     ajax: {
                         url: '',
