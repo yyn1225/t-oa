@@ -470,7 +470,16 @@
                                     viewRes = viewHtml;
                                 }
                                 if (row.securitys == 1 || row.securitys==3) {
-                                    viewRes = viewHtml + download;
+                                    if (row.extend.toLowerCase() === 'pptx' ||
+                                            row.extend.toLowerCase() === 'ppt' ||
+                                    row.extend.toLowerCase() === 'xls' ||
+                                    row.extend.toLowerCase() === 'xlsx' ||
+                                    row.extend.toLowerCase() === 'doc' ||
+                                    row.extend.toLowerCase() === 'docx') {
+                                        viewRes = download;
+                                    } else {
+                                        viewRes = viewHtml + download;
+                                    }
                                 }
                                 else {
                                     viewRes = "";
