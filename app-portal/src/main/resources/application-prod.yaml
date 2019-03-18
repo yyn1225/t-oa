@@ -8,16 +8,13 @@ oa:
   shiro: false
   sso-client-id: APP004
   sso-secret: c36b2a430437898b76bfaeac8058b230
-  sso-url: http://113.108.97.119:8800/
+  sso-url: http://w3.absen.com:8800/
   media-url: http://ast.absen.com:9001/ #深圳
-#  media-url: http://54.178.16.252:9001/ #东京
   is-synchronization-data: true  #深圳
-#  is-synchronization-data: false #东京
   sms: false
   mail-expired-time: 120 # 过期时长 单位: 秒
   deploy-server-path: http://192.168.1.56:9091/
   media-path: C:\files\ #深圳
-#  media-path: D:\files\ #东京
   internal-server-path: http://ast.absen.com:9091/
   foreign-server-path: http://54.178.16.252:9091/
   connect-oa-crm-interface: true
@@ -90,13 +87,6 @@ spring:
     url: jdbc:sqlserver://192.168.100.161:1433;DatabaseName=Absen
     username: sa
     password: sale1213@
-     # 东京
-#    url: jdbc:sqlserver://127.0.0.1:1433;DatabaseName=Absen
-#    username: sa
-#    password: Netword%1344
-#    url: jdbc:sqlserver://192.168.1.4:1433;DatabaseName=absen_new
-#    username: sa
-#    password: 123123
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     type: com.alibaba.druid.pool.DruidDataSource
     # druid 配置
@@ -110,9 +100,6 @@ spring:
       WebStatFilter:
         enabled: false
   mail:
-#    host: smtp.163.com
-#    username: xujiuhuamoney@163.com
-#    password: test123
     host: mail.absen.com
     username: smartsales@absen.com
     password: absen.20141204
